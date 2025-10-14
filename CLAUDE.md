@@ -27,15 +27,30 @@ Always run these commands before committing:
 
 ## Architecture Overview
 
-### Current Project Structure (Minimal Setup)
+### Current Project Structure (Actual Current State)
 
 ```
 src/
-└── app/                   # Next.js 15 App Router
-    ├── favicon.ico        # Default favicon
-    ├── globals.css        # Tailwind CSS 4.x + shadcn/ui styles
-    ├── layout.tsx         # Root layout
-    └── page.tsx           # Home page
+├── app/                   # Next.js 15 App Router
+│   ├── components-test/   # Component showcase/testing page
+│   │   └── page.tsx
+│   ├── favicon.ico        # Default favicon
+│   ├── globals.css        # Tailwind CSS 3.x + shadcn/ui styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # shadcn/ui components
+│   └── ui/               # Reusable UI components
+│       ├── alert.tsx
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── dialog.tsx
+│       ├── dropdown-menu.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       └── select.tsx
+└── lib/                  # Utilities
+    └── utils.ts          # shadcn/ui utility functions
 ```
 
 ### Missing Structure (To Be Built)
@@ -52,7 +67,8 @@ src/
 │   ├── logging/           # ❌ Structured error logging system
 │   └── config/            # ❌ Environment and service configuration
 ├── types/                 # ❌ TypeScript type definitions
-└── components/            # ❌ React components (shadcn/ui based)
+└── components/            # ✅ React components (shadcn/ui based) - PARTIALLY IMPLEMENTED
+    └── ui/                # ✅ Core UI components available
 ```
 
 ### Essential Dependencies Installed
@@ -60,7 +76,7 @@ src/
 - **Next.js 15.5.4** - App Router framework
 - **React 19.1.0** - Latest React with concurrent features
 - **TypeScript 5.x** - Type safety
-- **Tailwind CSS 4.x** - Utility-first styling (no config file needed)
+- **Tailwind CSS 3.x** - Utility-first styling with config file
 - **shadcn/ui** - Component library with:
   - `@radix-ui/react-slot` - Component composition
   - `class-variance-authority` - Component variants
@@ -103,10 +119,17 @@ src/
 
 ### Import Path Aliases
 
-- `@/app/*` → `./src/app/*`
-- `@/components/*` → `./src/components/*`
-- `@/lib/*` → `./src/lib/*`
-- `@/types/*` → `./src/types/*`
+- `@/*` → `./src/*` (configured in tsconfig.json)
+
+### shadcn/ui Configuration
+
+- **Style**: new-york style variant
+- **Base color**: gray
+- **CSS variables**: enabled for theming
+- **Icon library**: lucide-react
+- **Component aliases**: 
+  - `@/components/ui` → UI components
+  - `@/lib/utils` → Utility functions
 
 # Development Guidelines for Claude Code
 

@@ -33,34 +33,45 @@ export default function ComponentsTestPage() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="mx-auto max-w-6xl space-y-8">
+        <Alert variant="destructive" className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Educational Test Page</AlertTitle>
+          <AlertDescription>
+            This page demonstrates CSS pseudo-element techniques.
+            For production code, use Lucide icon components instead of pseudo-element icons.
+          </AlertDescription>
+        </Alert>
+
         <div className="text-center">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            shadcn/ui Components Test
+            shadcn/ui Components + CSS Pseudo-Elements Test
           </h1>
           <p className="text-muted-foreground">
-            Testing all installed components with Tailwind CSS v3
+            Testing components with educational pseudo-element demonstrations
           </p>
         </div>
 
         {/* Buttons Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Buttons</CardTitle>
-            <CardDescription>Different button variants and sizes</CardDescription>
+            <CardTitle>Buttons with Pseudo-Elements</CardTitle>
+            <CardDescription>
+              Note: Production code should use Lucide icon components instead of pseudo-elements
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button className="relative before:content-['★'] before:absolute before:-left-6 before:top-1/2 before:-translate-y-1/2 before:text-yellow-400">Default</Button>
-              <Button variant="secondary" className="relative after:content-['→'] after:absolute after:-right-6 after:top-1/2 after:-translate-y-1/2 after:text-blue-500">Secondary</Button>
-              <Button variant="destructive" className="relative before:content-['⚠'] before:absolute before:top-0 before:right-0 before:-translate-y-1/2 before:translate-x-1/2 before:text-xs">Destructive</Button>
-              <Button variant="outline" className="relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400/20 before:to-pink-400/20 before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-500">Outline</Button>
-              <Button variant="ghost" className="relative after:content-[''] after:absolute after:inset-0 after:border after:border-current after:rounded after:scale-0 hover:after:scale-105 after:transition-transform after:duration-200 after:opacity-30">Ghost</Button>
-              <Button variant="link" className="relative before:content-['🔗'] before:absolute before:-left-5 before:top-1/2 before:-translate-y-1/2 before:text-sm before:opacity-60">Link</Button>
+            <div className="flex flex-wrap gap-12">
+              <Button className="relative pl-8 before:content-['★'] before:absolute before:left-2 before:top-1/2 before:-translate-y-1/2 before:pointer-events-none before:text-yellow-400">Default</Button>
+              <Button variant="secondary" className="relative pr-8 after:content-['→'] after:absolute after:right-2 after:top-1/2 after:-translate-y-1/2 after:pointer-events-none after:text-blue-500">Secondary</Button>
+              <Button variant="destructive" className="relative pt-6 before:content-['⚠'] before:absolute before:top-1 before:right-2 before:pointer-events-none before:text-xs">Destructive</Button>
+              <Button variant="outline" className="relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400/20 before:to-pink-400/20 before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-500 before:pointer-events-none before:z-[-1]">Outline</Button>
+              <Button variant="ghost" className="relative after:content-[''] after:absolute after:inset-0 after:border after:border-current after:rounded after:scale-0 hover:after:scale-105 after:transition-transform after:duration-200 after:opacity-30 after:pointer-events-none after:z-[-1]">Ghost</Button>
+              <Button variant="link" className="relative pl-7 before:content-['🔗'] before:absolute before:left-1 before:top-1/2 before:-translate-y-1/2 before:pointer-events-none before:text-sm before:opacity-60">Link</Button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" className="relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-current hover:after:w-full after:transition-all after:duration-300">Small</Button>
-              <Button size="default" className="relative before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-0.5 before:bg-gradient-to-r before:from-green-400 before:to-blue-500">Default</Button>
-              <Button size="lg" className="relative after:content-['✨'] after:absolute after:top-1 after:right-1 after:text-xs after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300">Large</Button>
+            <div className="flex flex-wrap gap-12">
+              <Button size="sm" className="relative after:content-[''] after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-current hover:after:w-full after:transition-all after:duration-300 after:pointer-events-none">Small</Button>
+              <Button size="default" className="relative before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-0.5 before:bg-gradient-to-r before:from-green-400 before:to-blue-500 before:pointer-events-none">Default</Button>
+              <Button size="lg" className="relative pr-8 after:content-['✨'] after:absolute after:top-1 after:right-1 after:text-xs after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300 after:pointer-events-none">Large</Button>
             </div>
           </CardContent>
         </Card>
@@ -204,20 +215,22 @@ export default function ComponentsTestPage() {
         {/* Pseudo Elements Test */}
         <Card>
           <CardHeader>
-            <CardTitle>Pseudo Elements Test</CardTitle>
-            <CardDescription>Testing ::before and ::after pseudo-elements</CardDescription>
+            <CardTitle>Advanced Pseudo Elements Test</CardTitle>
+            <CardDescription>
+              Educational demonstrations of CSS pseudo-element techniques (use sparingly in production)
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Buttons with Pseudo Elements</h3>
-              <div className="flex flex-wrap gap-4">
-                <Button className="relative before:content-['✨'] before:absolute before:-left-6 before:top-1/2 before:-translate-y-1/2">
+              <div className="flex flex-wrap gap-12">
+                <Button className="relative pl-8 before:content-['✨'] before:absolute before:left-2 before:top-1/2 before:-translate-y-1/2 before:pointer-events-none">
                   Before Icon
                 </Button>
-                <Button className="relative after:content-['→'] after:absolute after:-right-6 after:top-1/2 after:-translate-y-1/2">
+                <Button className="relative pr-8 after:content-['→'] after:absolute after:right-2 after:top-1/2 after:-translate-y-1/2 after:pointer-events-none">
                   After Arrow
                 </Button>
-                <Button className="relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-400 before:to-purple-600 before:rounded before:opacity-0 hover:before:opacity-20 before:transition-opacity before:-z-10">
+                <Button className="relative before:content-[''] before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-400 before:to-purple-600 before:rounded before:opacity-0 hover:before:opacity-20 before:transition-opacity before:pointer-events-none before:z-[-1]">
                   Hover Overlay
                 </Button>
               </div>
@@ -226,14 +239,14 @@ export default function ComponentsTestPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Cards with Decorative Elements</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <Card className="relative before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r before:from-blue-500 before:to-purple-500 before:rounded-t">
+                <Card className="relative before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-gradient-to-r before:from-blue-500 before:to-purple-500 before:rounded-t before:pointer-events-none">
                   <CardHeader>
                     <CardTitle>Top Border Card</CardTitle>
                     <CardDescription>Card with gradient top border using ::before</CardDescription>
                   </CardHeader>
                 </Card>
                 
-                <Card className="relative after:content-['💎'] after:absolute after:top-4 after:right-4 after:text-2xl after:opacity-20">
+                <Card className="relative after:content-['💎'] after:absolute after:top-4 after:right-4 after:text-2xl after:opacity-20 after:pointer-events-none">
                   <CardHeader>
                     <CardTitle>Corner Decoration</CardTitle>
                     <CardDescription>Card with emoji decoration using ::after</CardDescription>
@@ -245,13 +258,16 @@ export default function ComponentsTestPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Text with Pseudo Elements</h3>
               <div className="space-y-2">
-                <p className="relative text-lg before:content-['\201C'] before:text-4xl before:text-primary/30 before:absolute before:-left-4 before:-top-2 after:content-['\201D'] after:text-4xl after:text-primary/30 after:absolute after:-bottom-4 after:-right-4">
-                  This text has decorative quotes using pseudo-elements
+                <p className="relative text-lg">
+                  <span className="relative pl-6 before:content-['\201C'] before:text-4xl before:text-primary/30 before:absolute before:left-0 before:-top-2 before:pointer-events-none">
+                    This text has decorative quotes using pseudo-elements
+                  </span>
+                  <span className="relative after:content-['\201D'] after:text-4xl after:text-primary/30 after:absolute after:top-0 after:left-0 after:pointer-events-none"></span>
                 </p>
-                <p className="relative pl-6 before:content-['▶'] before:absolute before:left-0 before:text-primary">
+                <p className="relative pl-6 before:content-['▶'] before:absolute before:left-0 before:text-primary before:pointer-events-none">
                   Bullet point with custom marker
                 </p>
-                <p className="relative border-l-4 border-primary pl-4 before:content-[''] before:absolute before:left-[-6px] before:top-1/2 before:-translate-y-1/2 before:w-3 before:h-3 before:bg-primary before:rounded-full">
+                <p className="relative border-l-4 border-primary pl-4 before:content-[''] before:absolute before:left-[-10px] before:top-1/2 before:-translate-y-1/2 before:w-3 before:h-3 before:bg-primary before:rounded-full before:pointer-events-none">
                   Custom border indicator with dot
                 </p>
               </div>
@@ -259,11 +275,11 @@ export default function ComponentsTestPage() {
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Interactive Pseudo Elements</h3>
-              <div className="flex flex-wrap gap-4">
-                <Badge className="relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-white/20 before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:skew-x-12">
+              <div className="flex flex-wrap gap-12">
+                <Badge className="relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-white/20 before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700 before:skew-x-12 before:pointer-events-none">
                   Shine Effect
                 </Badge>
-                <Badge className="relative after:content-[''] after:absolute after:inset-0 after:border-2 after:border-current after:rounded after:scale-110 after:opacity-0 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:duration-200">
+                <Badge className="relative after:content-[''] after:absolute after:inset-0 after:border-2 after:border-current after:rounded after:scale-110 after:opacity-0 hover:after:scale-100 hover:after:opacity-100 after:transition-all after:duration-200 after:pointer-events-none">
                   Border Pulse
                 </Badge>
               </div>

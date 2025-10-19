@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default: deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // TODO: Add specific rules for leads, clients, cases, etc.
+    // For now, allowing authenticated users (will be refined)
+    match /leads/{leadId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /clients/{clientId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /cases/{caseId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /portals/{portalId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

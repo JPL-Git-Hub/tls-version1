@@ -46,4 +46,19 @@ const configureEmulators = () => {
 
 configureEmulators()
 
+// Server-side ID token verification for middleware authentication
+export const verifyIdToken = async (
+  idToken: string
+): Promise<{ uid: string; email: string } | null> => {
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(idToken)
+    return {
+      uid: decodedToken.uid,
+      email: decodedToken.email || '',
+    }
+  } catch (error) {
+    return null
+  }
+}
+
 export default adminApp

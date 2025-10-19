@@ -1,19 +1,30 @@
-import { initializeApp, getApps } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
-import { getAuth } from 'firebase/auth'
+import { initializeApp, getApps, getApp } from 'firebase/app'
+import { getAuth, connectAuthEmulator } from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
+import { getStorage, connectStorageEmulator } from 'firebase/storage'
+import {
+  firebaseClientConfig,
+  useEmulator,
+} from '@/lib/config/firebase.client'
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+// Initialize Firebase app with singleton pattern
+const firebaseApp =
+  getApps().length === 0 ? initializeApp(firebaseClientConfig) : getApp()
+
+// Initialize Firebase services
+export const clientAuth = getAuth(firebaseApp)
+export const clientDb = getFirestore(firebaseApp)
+export const clientStorage = getStorage(firebaseApp)
+
+// Connect to emulators if USE_EMULATOR=true
+if (useEmulator) {
+  try {
+    connectAuthEmulator(clientAuth, 'http://localhost:9099')
+    connectFirestoreEmulator(clientDb, 'localhost', 8080)
+    connectStorageEmulator(clientStorage, 'localhost', 9199)
+  } catch {
+    // Emulators already connected
+  }
 }
 
-// Initialize Firebase client
-const apps = getApps()
-const clientApp = apps.length === 0 ? initializeApp(firebaseConfig) : apps[0]
-
-export const clientDb = getFirestore(clientApp)
-export const clientAuth = getAuth(clientApp)
+export default firebaseApp

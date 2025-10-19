@@ -1,17 +1,49 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { initializeApp, getApps, cert, App } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
+import { getFirestore } from 'firebase-admin/firestore'
+import { getStorage } from 'firebase-admin/storage'
+import { firebaseAdminConfig, useEmulator, getEmulatorConfig } from '@/lib/config/firebase.server'
 
-// Initialize Firebase Admin SDK
-const apps = getApps()
-const adminApp = apps.length === 0 ? initializeApp({
-  credential: cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  }),
-  projectId: process.env.FIREBASE_PROJECT_ID,
-}) : apps[0]
+// Initialize Firebase Admin app with singleton pattern
+const getAdminApp = (): App => {
+  if (getApps().length === 0) {
+    if (useEmulator) {
+      return initializeApp({
+        projectId: firebaseAdminConfig.projectId,
+      })
+    }
 
-export const adminDb = getFirestore(adminApp)
+    return initializeApp({
+      credential: cert({
+        projectId: firebaseAdminConfig.projectId,
+        clientEmail: firebaseAdminConfig.clientEmail,
+        privateKey: firebaseAdminConfig.privateKey
+          ? firebaseAdminConfig.privateKey.replace(/\\n/g, '\n')
+          : '',
+      }),
+    })
+  }
+  return getApps()[0]
+}
+
+const adminApp = getAdminApp()
+
+// Initialize Firebase Admin services
 export const adminAuth = getAuth(adminApp)
+export const adminDb = getFirestore(adminApp)
+export const adminStorage = getStorage(adminApp)
+
+// Configure emulators using centralized pattern
+const configureEmulators = () => {
+  if (useEmulator) {
+    const emulatorConfig = getEmulatorConfig()
+
+    Object.entries(emulatorConfig).forEach(([key, value]) => {
+      process.env[key] = value
+    })
+  }
+}
+
+configureEmulators()
+
+export default adminApp

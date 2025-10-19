@@ -100,8 +100,23 @@ src/
 
 **Google Services Integration**:
 
-- `src/lib/google/drive.ts` → Document management integration
-- `src/lib/google/auth.ts` → Service account authentication
+- `src/lib/google/auth.ts` → Service account authentication with Drive, Calendar, Gmail, People APIs
+- Google Workspace APIs: Drive, Calendar, Gmail, People with OAuth2 scopes
+
+**Email Infrastructure**:
+
+- `src/lib/email/transport.ts` → Gmail OAuth2 + Nodemailer transporter
+- `src/lib/email/send-email.ts` → Email sending utilities
+- `src/components/email/` → React Email templates
+- Dual auth: Gmail OAuth2 or service account delegation
+
+**Type System**:
+
+- `src/types/database.ts` → Database schema types
+- `src/types/external.ts` → External API types
+- `src/types/inputs.ts` → Form input types
+- `src/types/transformations.ts` → Data transformation types
+- `src/types/temporary.ts` → Temporary/utility types
 
 ### Import Path Aliases
 

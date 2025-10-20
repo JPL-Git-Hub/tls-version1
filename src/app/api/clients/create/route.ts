@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/firebase/admin'
 import { verifyAttorneyToken } from '@/lib/firebase/server-claims'
-import { createClient } from '@/lib/firebase/firestore'
+import { createClient, countRecentClientsByEmail } from '@/lib/firebase/firestore'
 import { ClientData } from '@/types/database'
-import { peopleClient } from '@/lib/google/auth'
+import { ClientInputSchema } from '@/types/inputs'
+import { createContact } from '@/lib/google/contacts'
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,25 +23,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Parse request body
+    // Parse and validate request body
     const body = await request.json()
-    const { email, firstName, lastName, mobilePhone, propertyAddress } = body
-
-    // Validate required fields
-    if (!email || !firstName || !lastName) {
+    const validation = ClientInputSchema.safeParse(body)
+    
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'VALIDATION_ERROR', message: 'Missing required fields: email, firstName, lastName' },
+        { error: 'VALIDATION_ERROR', message: 'Invalid input data', details: validation.error.issues },
         { status: 400 }
       )
     }
 
+    const clientInput = validation.data
+
+    // Check for excessive submissions (same email > 3 in last 24 hours)
+    if (!isAttorneyRequest) {
+      const recentCount = await countRecentClientsByEmail(clientInput.email, 24)
+      if (recentCount >= 3) {
+        return NextResponse.json(
+          { error: 'RATE_LIMIT_EXCEEDED', message: 'Maximum submissions per day reached' },
+          { status: 429 }
+        )
+      }
+    }
+
     // Create client data object
     const clientData: Omit<ClientData, 'clientId' | 'createdAt' | 'updatedAt'> = {
-      email,
-      firstName,
-      lastName,
-      mobilePhone: mobilePhone || '',
-      propertyAddress: propertyAddress || undefined,
+      email: clientInput.email,
+      firstName: clientInput.firstName,
+      lastName: clientInput.lastName,
+      mobilePhone: clientInput.mobilePhone,
+      propertyAddress: clientInput.propertyAddress,
       status: isAttorneyRequest ? 'active' : 'lead' // Attorneys create active clients, public creates leads
     }
 
@@ -49,31 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Sync to Google Contacts (one-way)
     try {
-      await peopleClient.people.createContact({
-        requestBody: {
-          names: [{
-            givenName: firstName,
-            familyName: lastName,
-            displayName: `${firstName} ${lastName}`
-          }],
-          emailAddresses: [{
-            value: email,
-            type: 'work'
-          }],
-          phoneNumbers: mobilePhone ? [{
-            value: mobilePhone,
-            type: 'mobile'
-          }] : undefined,
-          addresses: propertyAddress ? [{
-            formattedValue: propertyAddress,
-            type: 'work'
-          }] : undefined,
-          biographies: [{
-            value: `TLS Lead - Status: ${clientData.status} - Client ID: ${clientId}`,
-            contentType: 'TEXT_PLAIN'
-          }]
-        }
-      })
+      await createContact(clientInput, clientId)
     } catch (contactError) {
       // Log but don't fail the request if Google Contacts sync fails
       console.error('Google Contacts sync failed:', contactError)

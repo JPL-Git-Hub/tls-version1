@@ -212,3 +212,14 @@ export const getClientCases = async (clientId: string): Promise<string[]> => {
   
   return clientCasesSnapshot.docs.map(doc => (doc.data() as ClientCases).caseId)
 }
+
+export const countRecentClientsByEmail = async (email: string, hoursAgo: number): Promise<number> => {
+  const cutoff = Timestamp.fromDate(new Date(Date.now() - hoursAgo * 60 * 60 * 1000))
+  const clientsSnapshot = await adminDb
+    .collection(COLLECTIONS.CLIENTS)
+    .where('email', '==', email)
+    .where('createdAt', '>=', cutoff)
+    .get()
+  
+  return clientsSnapshot.size
+}

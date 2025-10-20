@@ -165,8 +165,11 @@ src/
 - `src/lib/config/firebase.server.ts` - Server-side config with emulator support  
 - `src/lib/config/firebase.client.ts` - Client-side config with emulator support
 
-**Firebase Integration**: Production-ready 9-file structure
-- `src/lib/firebase/admin.ts` - Admin SDK initialization with verifyIdToken()
+**Firebase Integration**: Production-ready 9-file structure with emulator support
+- `src/lib/firebase/admin.ts` - Admin SDK initialization with emulator configuration
+  - **Critical**: NO credentials in emulator mode (prevents authentication errors)
+  - Environment variables configure emulator routing automatically
+  - Singleton pattern prevents double initialization from Next.js hot reloading
 - `src/lib/firebase/client.ts` - Client SDK initialization  
 - `src/lib/firebase/auth.ts` - Firebase authentication utilities
 - `src/lib/firebase/firestore.ts` - CRUD operations (createClient, getClient, updateClient)
@@ -174,11 +177,17 @@ src/
 - `src/lib/firebase/client-claims.ts` - Client claims management
 - `src/lib/firebase/storage.ts` - Firebase storage operations
 
-**API Endpoints**: Complete system with authentication
-- `POST /api/clients/create` - Create new client with auto-generated fields
+**API Endpoints**: Complete M1 lead capture system with authentication
+- `POST /api/clients/create` - **M1 Lead Capture System**: Creates clientId with auto-generated fields and client status as 'lead'
+  - **Public submissions**: Consultation requests from website forms
+  - **Attorney submissions**: Admin dashboard bookings for clients
+  - **Rate limiting**: Max 3 submissions per email per 24 hours (public only)
+  - **Google Contacts sync**: One-way sync to Google Contacts during creation
+  - **Client lifecycle**: Single `clientId` persists from lead → active client (M1 → M2)
+  - **M2 trigger**: Attorney manually converts lead to active client after consultation when client decides to hire
 - `GET /api/clients` - List all clients for authenticated attorney
 - `GET /api/clients/[id]` - Retrieve specific client by ID
-- `PUT /api/clients/[id]` - Update client fields (excludes attorneyId/createdAt)
+- `PUT /api/clients/[id]` - Update client fields (excludes attorneyId/createdAt, enables M1→M2 conversion)
 - `POST /api/logs/client-error` - Client-side error logging endpoint
 
 **Email Infrastructure**: Complete implementation ✅ IMPLEMENTED
@@ -252,6 +261,14 @@ src/
   - `@/components/ui` → UI components
   - `@/lib/utils` → Utility functions
   - `@/hooks` → Custom React hooks
+
+## Firebase Emulator Development
+
+### Environment Configuration
+- **Emulator mode**: Set `USE_EMULATOR=true` and `FIRESTORE_EMULATOR_HOST=localhost:8080` in `.env.local`
+- **Admin SDK**: Automatically detects emulator via environment variables (no `.settings()` calls needed)
+- **Credential isolation**: NO service account credentials in emulator mode (prevents authentication errors)
+- **Testing**: Use `./scripts/local-dev-emulator.sh` for full emulator development environment
 
 ## Critical Architecture Constraints
 

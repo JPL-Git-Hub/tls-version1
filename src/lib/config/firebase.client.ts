@@ -1,7 +1,7 @@
 import { validateServiceConfig } from './ext-env-var'
 
 const validateClientConfig = () => {
-  const useEmulator = process.env.USE_EMULATOR === 'true'
+  const useEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true'
 
   if (useEmulator) {
     return {
@@ -29,4 +29,4 @@ const validateClientConfig = () => {
 }
 
 export const firebaseClientConfig = validateClientConfig()
-export const useEmulator = process.env.USE_EMULATOR === 'true'
+export const useEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true'

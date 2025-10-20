@@ -6,6 +6,7 @@ import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
 import { clientAuth } from '@/lib/firebase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert } from '@/components/ui/alert'
 import { LawShopLogo } from '@/components/law-shop-logo'
 
 export default function AdminLoginPage() {
@@ -23,6 +24,10 @@ export default function AdminLoginPage() {
         hd: 'thelawshop.com' // Restrict to your law firm's domain
       })
       
+      // Add required scopes for Google services
+      provider.addScope('https://www.googleapis.com/auth/contacts.readonly')
+      provider.addScope('https://www.googleapis.com/auth/calendar.readonly')
+      
       const userCredential = await signInWithPopup(clientAuth, provider)
       const user = userCredential.user
       
@@ -33,23 +38,18 @@ export default function AdminLoginPage() {
         return
       }
       
-      // Get ID token to verify attorney role
-      const idToken = await user.getIdToken()
+      // Get ID token result to check custom claims
+      const idTokenResult = await user.getIdTokenResult()
       
-      // Verify attorney role with your backend
-      const response = await fetch('/api/clients', {
-        headers: {
-          'Authorization': `Bearer ${idToken}`
-        }
-      })
-      
-      if (response.ok) {
-        // Attorney verified, redirect to dashboard
-        router.push('/admin/dashboard')
-      } else {
+      // Verify attorney role from custom claims
+      if (idTokenResult.claims.role !== 'attorney') {
         setError('Access denied. Attorney credentials required.')
         await clientAuth.signOut()
+        return
       }
+      
+      // Attorney verified, redirect to dashboard
+      router.push('/admin/dashboard')
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         setError('Sign-in cancelled')
@@ -76,9 +76,9 @@ export default function AdminLoginPage() {
         <CardContent>
           <div className="space-y-4">
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
+              <Alert variant="destructive">
                 {error}
-              </div>
+              </Alert>
             )}
             <Button 
               onClick={handleGoogleLogin}

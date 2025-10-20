@@ -1,5 +1,4 @@
 // Temporary processing types and intermediate data structures
-import type { LeadFormData } from './inputs'
 
 // Document Processing Data (minimal for compilation)
 export interface DocumentProcessingData {

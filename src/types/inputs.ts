@@ -1,12 +1,13 @@
 // Form validation schemas and input types
 import { z } from 'zod'
 
-// Lead form validation (initial client contact)
-export const LeadFormSchema = z.object({
+// Client input validation (for both attorney and lead form submissions)
+export const ClientInputSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
   mobilePhone: z.string().min(1, 'Mobile phone is required'),
+  propertyAddress: z.string().optional(),
 })
 
 // Document upload form validation
@@ -30,7 +31,7 @@ export const PortalCreationSchema = z.object({
 })
 
 // Inferred types from schemas
-export type LeadFormData = z.infer<typeof LeadFormSchema>
+export type ClientInput = z.infer<typeof ClientInputSchema>
 export type DocumentUploadData = z.infer<typeof DocumentUploadSchema>
 export type CaseCreationData = z.infer<typeof CaseCreationSchema>
 export type PortalCreationData = z.infer<typeof PortalCreationSchema>

@@ -78,6 +78,7 @@ src/
 │   ├── globals.css                   # Tailwind CSS 3.x + shadcn/ui styles
 │   ├── layout.tsx                    # Root layout
 │   └── page.tsx                      # Home page
+├── middleware.ts                     # Next.js middleware for route protection
 ├── components/                       # React components
 │   ├── email/                        # React Email templates
 │   │   ├── base-template.tsx         # Base email template
@@ -348,6 +349,7 @@ src/
 2. Run `npm run lint` to check code style and catch issues
 3. Run `npm run format:check` to verify code formatting
 4. Run `npm run test:firebase` to validate Firebase integration
+5. Run `node scripts/analyze-imports.js` to verify Firebase SDK separation compliance
 
 ### Code Quality Tools
 - **ESLint**: Next.js configuration with Prettier integration

@@ -3,15 +3,33 @@ const admin = require('firebase-admin')
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
-  const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  }
+  const useEmulator = process.env.USE_EMULATOR === 'true'
   
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  })
+  if (useEmulator) {
+    // Emulator mode: NO credentials, simple project ID only
+    process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080'
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099'
+    
+    admin.initializeApp({
+      projectId: 'tls-version1',
+      // NO credential property - prevents Google authentication
+    })
+    
+    console.log('🧪 Using Firebase emulators')
+  } else {
+    // Production mode
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    })
+    
+    console.log('🔥 Using production Firebase')
+  }
 }
 
 const adminAuth = admin.auth()

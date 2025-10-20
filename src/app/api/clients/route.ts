@@ -35,10 +35,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get all clients for this attorney
+    // Get all clients
     const clientsSnapshot = await adminDb
       .collection(COLLECTIONS.CLIENTS)
-      .where('attorneyId', '==', user.uid)
       .get()
 
     const clients = clientsSnapshot.docs.map(doc => ({

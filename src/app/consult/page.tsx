@@ -48,7 +48,13 @@ export default function ConsultationFormPage() {
         throw new Error(errorData.message || 'Failed to submit consultation request')
       }
 
-      // Success - redirect to booking page
+      // Success - store booking data and redirect to booking page
+      sessionStorage.setItem('bookingData', JSON.stringify({
+        name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        ...(data.propertyAddress && { "metadata[property]": data.propertyAddress }),
+        ...(data.purchasePrice && { "metadata[price]": `$${data.purchasePrice.toLocaleString()}` })
+      }))
       router.push('/consult/book')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')

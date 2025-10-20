@@ -3,6 +3,7 @@ import { verifyIdToken } from '@/lib/firebase/admin'
 import { verifyAttorneyToken } from '@/lib/firebase/server-claims'
 import { createClient } from '@/lib/firebase/firestore'
 import { ClientData } from '@/types/database'
+import { peopleClient } from '@/lib/google/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +46,38 @@ export async function POST(request: NextRequest) {
 
     // Create client in Firestore
     const clientId = await createClient(clientData)
+
+    // Sync to Google Contacts (one-way)
+    try {
+      await peopleClient.people.createContact({
+        requestBody: {
+          names: [{
+            givenName: firstName,
+            familyName: lastName,
+            displayName: `${firstName} ${lastName}`
+          }],
+          emailAddresses: [{
+            value: email,
+            type: 'work'
+          }],
+          phoneNumbers: mobilePhone ? [{
+            value: mobilePhone,
+            type: 'mobile'
+          }] : undefined,
+          addresses: propertyAddress ? [{
+            formattedValue: propertyAddress,
+            type: 'work'
+          }] : undefined,
+          biographies: [{
+            value: `TLS Lead - Status: ${clientData.status} - Client ID: ${clientId}`,
+            contentType: 'TEXT_PLAIN'
+          }]
+        }
+      })
+    } catch (contactError) {
+      // Log but don't fail the request if Google Contacts sync fails
+      console.error('Google Contacts sync failed:', contactError)
+    }
 
     return NextResponse.json(
       { 

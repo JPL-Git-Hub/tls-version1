@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       firstName: clientInput.firstName,
       lastName: clientInput.lastName,
       mobilePhone: clientInput.mobilePhone,
-      propertyAddress: clientInput.propertyAddress,
+      ...(clientInput.propertyAddress && { propertyAddress: clientInput.propertyAddress }),
       status: isAttorneyRequest ? 'active' : 'lead' // Attorneys create active clients, public creates leads
     }
 

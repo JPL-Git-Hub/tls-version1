@@ -8,6 +8,25 @@ Claude Code or CC should employ the following incremental Implementation Approac
 - **Follow established patterns** - Use existing codebase patterns and conventions
 - **Minimal scope changes** - Avoid expanding beyond the specific request
 
+## Development Commands
+
+### Core Development
+- `npm run dev` - Start Next.js development server (http://localhost:3000)
+- `npm run build` - Build production bundle
+- `npm run start` - Start production server
+
+### Code Quality
+- `npm run lint` - Run ESLint with Next.js config
+- `npm run type-check` - TypeScript type checking without emit
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+
+### Email Development
+- `npm run email:preview` - Preview React Email templates (http://localhost:3001)
+
+### Firebase Testing
+- `npm run test:firebase` - Run Firebase connection and operation tests
+
 ## Current Implementation
 
 ### Project Structure
@@ -15,6 +34,13 @@ Claude Code or CC should employ the following incremental Implementation Approac
 ```
 src/
 ├── app/                              # Next.js 15 App Router
+│   ├── api/                          # Server-side API endpoints
+│   │   └── clients/                  # Client CRUD operations
+│   │       ├── create/
+│   │       │   └── route.ts          # POST /api/clients/create
+│   │       ├── [id]/
+│   │       │   └── route.ts          # GET/PUT /api/clients/[id]
+│   │       └── route.ts              # GET /api/clients
 │   ├── components-test/              # Component showcase/testing page
 │   │   └── page.tsx
 │   ├── document-management-system-test/ # Document management testing page
@@ -48,8 +74,19 @@ src/
 │       └── tooltip.tsx
 ├── hooks/                           # Custom React hooks
 │   └── use-mobile.ts               # Mobile detection hook
-└── lib/                            # Utilities
-    └── utils.ts                    # shadcn/ui utility functions
+├── lib/                            # Utilities and configurations
+│   ├── config/                     # Configuration management
+│   │   ├── ext-env-var.ts         # External service validation
+│   │   ├── firebase.client.ts     # Client-side Firebase config
+│   │   └── firebase.server.ts     # Server-side Firebase config
+│   ├── firebase/                   # Firebase integrations
+│   │   ├── admin.ts               # Admin SDK for API routes
+│   │   ├── client.ts              # Client SDK for components
+│   │   ├── firestore.ts           # CRUD operations
+│   │   └── server-claims.ts       # Custom claims verification
+│   └── utils.ts                   # shadcn/ui utility functions
+└── types/                          # TypeScript type definitions
+    └── database.ts                 # Database schema types
 ```
 
 ### Installed Dependencies
@@ -71,20 +108,43 @@ src/
   - `date-fns` - Date manipulation
   - `pdfjs-dist` - PDF handling capabilities
   - `@tailwindcss/forms` - Enhanced form styling
+- **Firebase**:
+  - `firebase` - Client SDK v10
+  - `firebase-admin` - Server SDK v12
+
+### Current Firebase Architecture
+
+**Configuration Management**: Centralized external service validation
+- `src/lib/config/ext-env-var.ts` - Fail-fast validation for production credentials
+- `src/lib/config/firebase.server.ts` - Server-side config with emulator support  
+- `src/lib/config/firebase.client.ts` - Client-side config with emulator support
+
+**Firebase Integration**: Production-ready 7-file structure
+- `src/lib/firebase/admin.ts` - Admin SDK initialization with verifyIdToken()
+- `src/lib/firebase/client.ts` - Client SDK initialization  
+- `src/lib/firebase/firestore.ts` - CRUD operations (createClient, getClient, updateClient)
+- `src/lib/firebase/server-claims.ts` - Custom claims verification (verifyAttorneyToken)
+
+**Client API**: Complete CRUD operations with attorney authentication
+- `POST /api/clients/create` - Create new client with auto-generated fields
+- `GET /api/clients` - List all clients for authenticated attorney
+- `GET /api/clients/[id]` - Retrieve specific client by ID
+- `PUT /api/clients/[id]` - Update client fields (excludes attorneyId/createdAt)
 
 ## Future Implementation (Not Yet Built)
 
-### One Potential Structure
+### Planned Structure Extensions
 
 ```
 src/
 ├── app/
-│   ├── admin/             # Attorney admin interface
+│   ├── admin/             # Attorney admin interface  
 │   ├── portal/[uuid]/     # Client-specific portals
-│   └── api/               # Server-side API endpoints
+│   └── api/
+│       └── portals/       # Portal management endpoints
 ├── lib/                   
-│   ├── firebase/          # Firebase integrations (
 │   ├── google/            # Google Workspace APIs
+│   └── email/             # Email infrastructure
 ```
 
 ### Planned Architectural Patterns
@@ -92,11 +152,11 @@ src/
 **Authentication Duality**: Two completely separate auth systems
 - `/portal/[uuid]` → Client-specific portal access (Firebase custom claims)
 
-**Firebase SDK Separation**: Strict server/client boundary enforcement
+**Firebase SDK Separation**: Strict server/client boundary enforcement ✅ IMPLEMENTED
 
-- `src/lib/firebase/admin.ts` → Admin SDK for API routes only
-- `src/lib/firebase/client.ts` → Client SDK for components only
-- Never mix admin/client imports in same file
+- `src/lib/firebase/admin.ts` → Admin SDK for API routes only ✅
+- `src/lib/firebase/client.ts` → Client SDK for components only ✅  
+- Never mix admin/client imports in same file ✅
 
 **Google Services Integration**:
 
@@ -107,8 +167,9 @@ src/
 
 - `src/lib/email/transport.ts` → Gmail OAuth2 + Nodemailer transporter
 - `src/lib/email/send-email.ts` → Email sending utilities
-- `src/components/email/` → React Email templates
+- `src/components/email/` → React Email templates with @react-email/components
 - Dual auth: Gmail OAuth2 or service account delegation
+- Preview server: Use `npm run email:preview` for template development
 
 **Type System**:
 
@@ -156,4 +217,17 @@ src/
 - **Data relationships**: Use junction collections for many-to-many client-case relationships
 - **Shared type files**: Type definitions for client code cannot import Firebase Admin SDK or server-only modules
 - **Route pages**: Server components by default - use 'use client' only for React hooks or browser APIs
+
+## Quality Assurance
+
+### Pre-commit Workflow
+1. Run `npm run type-check` to verify TypeScript compilation
+2. Run `npm run lint` to check code style and catch issues
+3. Run `npm run format:check` to verify code formatting
+4. Run `npm run test:firebase` to validate Firebase integration
+
+### Code Quality Tools
+- **ESLint**: Next.js configuration with Prettier integration
+- **TypeScript**: Strict mode enabled with noEmit for type checking
+- **Prettier**: Consistent code formatting across the project
 

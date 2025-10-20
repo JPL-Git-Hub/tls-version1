@@ -9,7 +9,7 @@ interface ConsultationConfirmationProps {
   propertyAddress?: string
 }
 
-export function ConsultationConfirmation({
+export default function ConsultationConfirmation({
   firstName,
   lastName,
   consultationDateTime,
@@ -167,3 +167,12 @@ const signature = {
   lineHeight: '24px',
   margin: '32px 0 0',
 }
+
+// Default props for preview
+ConsultationConfirmation.PreviewProps = {
+  firstName: 'John',
+  lastName: 'Doe',
+  consultationDateTime: '2024-03-15T14:00:00Z',
+  bookingId: 'cal_abc123',
+  propertyAddress: '123 Main Street, Brooklyn, NY 11201',
+} as ConsultationConfirmationProps

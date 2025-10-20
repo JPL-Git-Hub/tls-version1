@@ -8,6 +8,7 @@ export const ClientInputSchema = z.object({
   email: z.string().email('Invalid email address'),
   mobilePhone: z.string().min(1, 'Mobile phone is required'),
   propertyAddress: z.string().optional(),
+  purchasePrice: z.number().positive().optional(),
 })
 
 // Document upload form validation

@@ -5,6 +5,7 @@ import type { CalcomWebhookPayload, CalcomEventType } from '@/types/external'
 import { adminDb } from '@/lib/firebase/admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { COLLECTIONS, type ClientData, type CaseData, type ClientCases } from '@/types/database'
+import { updateClient, updateCase, getClientCases } from '@/lib/firebase/firestore'
 
 /**
  * Cal.com Webhook Handler
@@ -69,46 +70,14 @@ function verifyWebhookSignature(
   }
 }
 
-// Log webhook event to Firestore for debugging
-async function logWebhookEvent(
-  eventType: CalcomEventType,
-  payload: CalcomWebhookPayload,
-  success: boolean,
-  error?: string
-) {
-  try {
-    const webhookId = `calcom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    
-    await adminDb.collection('webhook_logs').doc(webhookId).set({
-      webhookId,
-      source: 'calcom',
-      eventType,
-      payload,
-      success,
-      error: error || null,
-      processedAt: Timestamp.now(),
-      createdAt: Timestamp.now()
-    })
-  } catch (logError) {
-    console.error('Failed to log webhook event:', logError)
-  }
-}
 
-// Link booking to existing client and create case
+// Link booking to existing client and update existing case
 async function handleCompleteBookingFlow(webhookPayload: CalcomWebhookPayload): Promise<{ clientId: string; caseId: string }> {
   const attendee = webhookPayload.payload.attendees[0]
   if (!attendee) {
     throw new Error('No attendee found in booking')
   }
 
-  const responses = webhookPayload.payload.responses || {}
-  
-  // Split full name into firstName and lastName
-  const fullName = attendee.name.trim()
-  const nameParts = fullName.split(' ')
-  const firstName = nameParts[0] || 'Unknown'
-  const lastName = nameParts.slice(1).join(' ') || 'Unknown'
-  
   // Find existing client by email (required - must fill form first)
   const existingClientQuery = await adminDb
     .collection(COLLECTIONS.CLIENTS)
@@ -120,58 +89,38 @@ async function handleCompleteBookingFlow(webhookPayload: CalcomWebhookPayload): 
     throw new Error(`No client found with email ${attendee.email}. Client must fill consultation form before booking.`)
   }
 
-  // Update existing client with booking metadata
+  // Get existing client data
   const existingDoc = existingClientQuery.docs[0]
   const clientId = existingDoc.id
   
-  await existingDoc.ref.update({
+  // Update existing client with booking metadata using utility function
+  const clientUpdates = {
     consultationBooked: true,
     consultationDate: Timestamp.fromDate(new Date(webhookPayload.payload.startTime)),
-    bookingId: webhookPayload.payload.uid,
-    updatedAt: Timestamp.now()
-  })
+    bookingId: webhookPayload.payload.uid
+  }
   
+  await updateClient(clientId, clientUpdates)
   console.log('Updated existing client with booking:', clientId)
 
-  // Create case record
-  const caseRef = adminDb.collection(COLLECTIONS.CASES).doc()
-  const caseId = caseRef.id
+  // Find existing case for this client (created by the form)
+  const caseIds = await getClientCases(clientId)
   
-  const caseData: Omit<CaseData, 'caseId'> = {
-    clientNames: `${firstName} ${lastName}`,
-    caseType: (responses.caseType as any) || 'Other',
-    status: 'intake',
-    consultationBookingId: webhookPayload.payload.uid,
-    consultationDateTime: Timestamp.fromDate(new Date(webhookPayload.payload.startTime)),
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
+  if (caseIds.length === 0) {
+    throw new Error(`No case found for client ${clientId}. Case should have been created by consultation form.`)
   }
-  
-  await caseRef.set({
-    caseId,
-    ...caseData
-  })
-  
-  console.log('Created case:', caseId)
 
-  // Link client to case via junction table
-  const clientCaseRef = adminDb.collection(COLLECTIONS.CLIENT_CASES).doc()
-  const participantId = clientCaseRef.id
+  // Use the first case (should only be one for new clients)
+  const caseId = caseIds[0]
   
-  const clientCaseData: Omit<ClientCases, 'participantId'> = {
-    clientId,
-    caseId,
-    role: 'primary',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now()
+  // Update existing case with booking metadata using utility function
+  const caseUpdates = {
+    consultationBookingId: webhookPayload.payload.uid,
+    consultationDateTime: Timestamp.fromDate(new Date(webhookPayload.payload.startTime))
   }
   
-  await clientCaseRef.set({
-    participantId,
-    ...clientCaseData
-  })
-  
-  console.log('Linked client to case:', participantId)
+  await updateCase(caseId, caseUpdates)
+  console.log('Updated existing case with booking metadata:', caseId)
 
   return { clientId, caseId }
 }
@@ -224,11 +173,26 @@ export async function POST(request: NextRequest) {
       webhookPayload = JSON.parse(rawBody)
     } catch (parseError) {
       console.error('Failed to parse Cal.com webhook payload:', parseError)
-      await logWebhookEvent('BOOKING_CREATED', {} as CalcomWebhookPayload, false, 'Invalid JSON payload')
       return NextResponse.json(
         { error: 'Invalid JSON payload' },
         { status: 400 }
       )
+    }
+
+    // First, log all webhook events to cal_webhooks collection for audit trail
+    try {
+      const webhookDocRef = adminDb.collection(COLLECTIONS.CAL_WEBHOOKS).doc()
+      await webhookDocRef.set({
+        webhookId: webhookDocRef.id,
+        eventType: webhookPayload.triggerEvent,
+        payload: webhookPayload,
+        processedAt: Timestamp.now(),
+        createdAt: Timestamp.now()
+      })
+      console.log('Logged webhook event to audit trail:', webhookPayload.triggerEvent)
+    } catch (logError) {
+      console.error('Failed to log webhook to audit trail:', logError)
+      // Continue processing even if logging fails
     }
 
     // DEBUG: Log complete Cal.com webhook payload
@@ -244,62 +208,37 @@ export async function POST(request: NextRequest) {
       attendeeEmail: webhookPayload.payload?.attendees?.[0]?.email
     })
 
-    // Handle different event types
-    switch (webhookPayload.triggerEvent) {
-      case 'BOOKING_CREATED':
-        try {
-          const result = await handleCompleteBookingFlow(webhookPayload)
-          
-          await logWebhookEvent(webhookPayload.triggerEvent, webhookPayload, true)
-          
-          return NextResponse.json({
-            success: true,
-            message: 'Booking linked to existing client and case created',
-            clientId: result.clientId,
-            caseId: result.caseId
-          })
-          
-        } catch (createError) {
-          console.error('Error processing booking flow:', createError)
-          await logWebhookEvent(webhookPayload.triggerEvent, webhookPayload, false, String(createError))
-          
-          return NextResponse.json(
-            { error: 'Failed to process booking', details: String(createError) },
-            { status: 500 }
-          )
-        }
-
-      case 'BOOKING_RESCHEDULED':
-        // TODO: Update consultation date in existing client record
-        console.log('Booking rescheduled - not yet implemented')
-        await logWebhookEvent(webhookPayload.triggerEvent, webhookPayload, true, 'Event logged but not processed')
-        break
-
-      case 'BOOKING_CANCELLED':
-        // TODO: Update client status or flag consultation as cancelled
-        console.log('Booking cancelled - not yet implemented')
-        await logWebhookEvent(webhookPayload.triggerEvent, webhookPayload, true, 'Event logged but not processed')
-        break
-
-      default:
-        console.log(`Unhandled Cal.com event: ${webhookPayload.triggerEvent}`)
-        await logWebhookEvent(webhookPayload.triggerEvent, webhookPayload, true, 'Event logged but not processed')
+    // Filter events: only process BOOKING_CREATED in M1
+    if (webhookPayload.triggerEvent !== 'BOOKING_CREATED') {
+      console.log(`Event ${webhookPayload.triggerEvent} logged but not processed in M1`)
+      return NextResponse.json({ 
+        success: true, 
+        message: `Event ${webhookPayload.triggerEvent} logged successfully` 
+      })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Webhook processed successfully' 
-    })
+    // Process BOOKING_CREATED event
+    try {
+      const result = await handleCompleteBookingFlow(webhookPayload)
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Booking linked to existing client and case updated',
+        clientId: result.clientId,
+        caseId: result.caseId
+      })
+      
+    } catch (createError) {
+      console.error('Error processing booking flow:', createError)
+      
+      return NextResponse.json(
+        { error: 'Failed to process booking', details: String(createError) },
+        { status: 500 }
+      )
+    }
 
   } catch (error) {
     console.error('Cal.com webhook processing error:', error)
-    
-    // Log the error
-    try {
-      await logWebhookEvent('BOOKING_CREATED', {} as CalcomWebhookPayload, false, String(error))
-    } catch (logError) {
-      console.error('Failed to log webhook error:', logError)
-    }
 
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },

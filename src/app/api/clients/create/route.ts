@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyIdToken } from '@/lib/firebase/admin'
 import { verifyAttorneyToken } from '@/lib/firebase/server-claims'
-import { createClient, countRecentClientsByEmail } from '@/lib/firebase/firestore'
-import { ClientData } from '@/types/database'
+import { createClient, countRecentClientsByEmail, createCase } from '@/lib/firebase/firestore'
+import { ClientData, CaseData } from '@/types/database'
 import { ClientInputSchema } from '@/types/inputs'
 import { createContact } from '@/lib/google/contacts'
 
@@ -60,6 +60,18 @@ export async function POST(request: NextRequest) {
     // Create client in Firestore
     const clientId = await createClient(clientData)
 
+    // Create case data object
+    const caseData: Omit<CaseData, 'caseId' | 'createdAt' | 'updatedAt'> = {
+      clientNames: `${clientInput.firstName} ${clientInput.lastName}`,
+      caseType: 'Other',
+      status: 'intake',
+      ...(clientInput.propertyAddress && { propertyAddress: clientInput.propertyAddress }),
+      ...(clientInput.purchasePrice && { purchasePrice: clientInput.purchasePrice })
+    }
+
+    // Create case and link to client
+    const caseId = await createCase(caseData, [{ clientId, role: 'primary' }])
+
     // Sync to Google Contacts (one-way)
     try {
       await createContact(clientInput, clientId)
@@ -72,7 +84,8 @@ export async function POST(request: NextRequest) {
       { 
         success: true, 
         clientId,
-        message: isAttorneyRequest ? 'Client created successfully' : 'Consultation request submitted successfully'
+        caseId,
+        message: isAttorneyRequest ? 'Client and case created successfully' : 'Consultation request submitted successfully'
       },
       { status: 201 }
     )

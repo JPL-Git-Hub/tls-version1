@@ -176,6 +176,17 @@ export const getCases = async (): Promise<CaseData[]> => {
   return casesSnapshot.docs.map(doc => doc.data() as CaseData)
 }
 
+export const updateCase = async (
+  caseId: string,
+  updates: Partial<Omit<CaseData, 'caseId' | 'createdAt'>>
+) => {
+  const caseRef = adminDb.collection(COLLECTIONS.CASES).doc(caseId)
+  await caseRef.update({
+    ...updates,
+    updatedAt: Timestamp.now(),
+  })
+}
+
 // Document operations
 export const createDocument = async (
   documentData: Omit<DocumentData, 'documentId' | 'createdAt' | 'updatedAt'>

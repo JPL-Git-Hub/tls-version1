@@ -53,9 +53,12 @@ src/
 │   │   │   ├── [id]/
 │   │   │   │   └── route.ts          # GET/PUT /api/clients/[id]
 │   │   │   └── route.ts              # GET /api/clients
-│   │   └── logs/                     # Error logging endpoints
-│   │       └── client-error/
-│   │           └── route.ts          # POST /api/logs/client-error
+│   │   ├── logs/                     # Error logging endpoints
+│   │   │   └── client-error/
+│   │   │       └── route.ts          # POST /api/logs/client-error
+│   │   └── webhooks/                 # External service webhooks
+│   │       └── calcom/
+│   │           └── route.ts          # POST /api/webhooks/calcom
 │   ├── components-test/              # Component showcase/testing page
 │   │   └── page.tsx
 │   ├── consult/                      # Consultation pages
@@ -189,6 +192,11 @@ src/
 - `GET /api/clients/[id]` - Retrieve specific client by ID
 - `PUT /api/clients/[id]` - Update client fields (excludes attorneyId/createdAt, enables M1→M2 conversion)
 - `POST /api/logs/client-error` - Client-side error logging endpoint
+- `POST /api/webhooks/calcom` - **Cal.com Webhook Integration**: Links bookings to existing clients
+  - **Enforces form-first workflow**: Throws error if client doesn't exist by email
+  - **Creates case records**: Consultation metadata and client-case relationships
+  - **Signature verification**: Production webhook security with development bypass
+  - **Comprehensive logging**: All webhook events logged to Firestore for debugging
 
 **Email Infrastructure**: Complete implementation ✅ IMPLEMENTED
 - `src/lib/email/transport.ts` - Gmail OAuth2 + Nodemailer transporter
@@ -203,6 +211,13 @@ src/
 - `src/lib/logging/error-handlers.ts` - Error handling utilities
 - `src/lib/logging/logger.client.ts` - Client-side logging
 - API endpoint for centralized error collection
+
+**Cal.com Webhook Integration**: Complete implementation ✅ IMPLEMENTED
+- `src/app/api/webhooks/calcom/route.ts` - Comprehensive booking flow handler
+- `src/types/external.ts` - Cal.com webhook types and payload structures
+- **Architecture**: Form-first workflow (client must exist before booking)
+- **Data flow**: Client lookup → booking metadata update → case creation → client-case linking
+- **Error handling**: Clear messaging for missing clients and comprehensive logging
 
 ## Future Implementation (Not Yet Built)
 
@@ -244,6 +259,13 @@ src/
 - `src/types/temporary.ts` → Temporary/utility types
 
 ## Development Infrastructure
+
+### Current Development Status
+- **Backend**: 90% complete - production-ready Firebase, Google APIs, email system, Cal.com webhook integration
+- **Frontend**: 15% complete - missing law firm homepage, admin dashboard, client portals
+- **Priority 1**: ✅ COMPLETED - Cal.com webhook integration for M1 lead capture
+- **Priority 2**: Professional homepage with lead capture form (React Hook Form)
+- **Priority 3**: Admin dashboard for attorney client management
 
 ### Import Path Aliases
 

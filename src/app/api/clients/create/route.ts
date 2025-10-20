@@ -6,33 +6,19 @@ import { ClientData } from '@/types/database'
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract token from Authorization header
+    // Check if this is an authenticated attorney request or public lead submission
     const authorization = request.headers.get('authorization')
-    if (!authorization?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'AUTH_UNAUTHORIZED', message: 'Missing or invalid authorization header' },
-        { status: 401 }
-      )
-    }
+    let isAttorneyRequest = false
 
-    const idToken = authorization.substring(7) // Remove 'Bearer ' prefix
-
-    // Verify basic token validity
-    const user = await verifyIdToken(idToken)
-    if (!user) {
-      return NextResponse.json(
-        { error: 'AUTH_UNAUTHORIZED', message: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    // Verify attorney role
-    const isAttorney = await verifyAttorneyToken(idToken)
-    if (!isAttorney) {
-      return NextResponse.json(
-        { error: 'AUTH_UNAUTHORIZED', message: 'Attorney access required' },
-        { status: 401 }
-      )
+    if (authorization?.startsWith('Bearer ')) {
+      const idToken = authorization.substring(7)
+      const user = await verifyIdToken(idToken)
+      if (user) {
+        const isAttorney = await verifyAttorneyToken(idToken)
+        if (isAttorney) {
+          isAttorneyRequest = true
+        }
+      }
     }
 
     // Parse request body
@@ -54,7 +40,7 @@ export async function POST(request: NextRequest) {
       lastName,
       mobilePhone: mobilePhone || '',
       propertyAddress: propertyAddress || undefined,
-      status: 'lead'
+      status: isAttorneyRequest ? 'active' : 'lead' // Attorneys create active clients, public creates leads
     }
 
     // Create client in Firestore
@@ -64,7 +50,7 @@ export async function POST(request: NextRequest) {
       { 
         success: true, 
         clientId,
-        message: 'Client created successfully'
+        message: isAttorneyRequest ? 'Client created successfully' : 'Consultation request submitted successfully'
       },
       { status: 201 }
     )

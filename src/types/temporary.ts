@@ -6,7 +6,7 @@ export interface DocumentProcessingData {
   documentId: string
   caseId: string
   processingStatus: string
-  extractedData?: any
+  extractedData?: unknown
   extractedText?: string
 }
 

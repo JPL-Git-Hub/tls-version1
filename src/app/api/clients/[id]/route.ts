@@ -5,8 +5,9 @@ import { getClient, updateClient } from '@/lib/firebase/firestore'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Extract token from Authorization header
     const authorization = request.headers.get('authorization')
@@ -38,7 +39,7 @@ export async function GET(
     }
 
     // Get client by ID
-    const client = await getClient(params.id)
+    const client = await getClient(id)
     if (!client) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: 'Client not found' },
@@ -50,7 +51,7 @@ export async function GET(
       { 
         success: true, 
         client: {
-          id: params.id,
+          id: id,
           ...client
         }
       },
@@ -68,8 +69,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     // Extract token from Authorization header
     const authorization = request.headers.get('authorization')
@@ -101,7 +103,7 @@ export async function PUT(
     }
 
     // Check if client exists
-    const existingClient = await getClient(params.id)
+    const existingClient = await getClient(id)
     if (!existingClient) {
       return NextResponse.json(
         { error: 'NOT_FOUND', message: 'Client not found' },
@@ -111,10 +113,10 @@ export async function PUT(
 
     // Parse request body
     const body = await request.json()
-    const { email, firstName, lastName, phone, address } = body
+    const { email, firstName, lastName, mobilePhone, propertyAddress } = body
 
     // Validate at least one field is provided
-    if (!email && !firstName && !lastName && !phone && !address) {
+    if (!email && !firstName && !lastName && !mobilePhone && !propertyAddress) {
       return NextResponse.json(
         { error: 'VALIDATION_ERROR', message: 'At least one field must be provided for update' },
         { status: 400 }
@@ -126,11 +128,11 @@ export async function PUT(
     if (email !== undefined) updates.email = email
     if (firstName !== undefined) updates.firstName = firstName
     if (lastName !== undefined) updates.lastName = lastName
-    if (phone !== undefined) updates.phone = phone
-    if (address !== undefined) updates.address = address
+    if (mobilePhone !== undefined) updates.mobilePhone = mobilePhone
+    if (propertyAddress !== undefined) updates.propertyAddress = propertyAddress
 
     // Update client in Firestore (updateClient sets updatedAt automatically)
-    await updateClient(params.id, updates)
+    await updateClient(id, updates)
 
     return NextResponse.json(
       { 

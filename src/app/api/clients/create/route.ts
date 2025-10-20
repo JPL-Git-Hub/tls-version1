@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { email, firstName, lastName, phone, address } = body
+    const { email, firstName, lastName, mobilePhone, propertyAddress } = body
 
     // Validate required fields
     if (!email || !firstName || !lastName) {
@@ -52,8 +52,9 @@ export async function POST(request: NextRequest) {
       email,
       firstName,
       lastName,
-      phone: phone || null,
-      address: address || null,
+      mobilePhone: mobilePhone || '',
+      propertyAddress: propertyAddress || undefined,
+      status: 'lead'
     }
 
     // Create client in Firestore

@@ -24,6 +24,7 @@ export interface ClientData {
   lastName: string
   email: string
   mobilePhone: string
+  propertyAddress?: string
   stripeCustomerId?: string
   status: 'lead' | 'paid' | 'active' | 'inactive'
   createdAt: TimestampType
@@ -48,6 +49,7 @@ export interface CaseData {
   caseType: CaseType
   status: CaseStatus
   propertyAddress?: string
+  purchasePrice?: number
   consultationBookingId?: string
   initialAttorneyConsulted?: string
   consultationDateTime?: TimestampType

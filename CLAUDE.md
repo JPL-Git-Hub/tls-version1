@@ -38,6 +38,7 @@ This is a **Next.js 15 App Router** application with **React Server Components**
 - `./scripts/local-dev-emulator.sh` - Start development with Firebase emulators
 - `./scripts/local-dev-real.sh` - Start development with production Firebase
 - `./scripts/clean-firestore.sh` - Clean Firestore data for testing
+- `node scripts/set-attorney-claims.js` - Set attorney custom claims for admin access
 
 ## Current Implementation
 
@@ -59,9 +60,17 @@ src/
 │   │   └── webhooks/                 # External service webhooks
 │   │       └── calcom/
 │   │           └── route.ts          # POST /api/webhooks/calcom
+│   ├── admin/                        # Attorney admin interface
+│   │   ├── dashboard/
+│   │   │   └── page.tsx              # Admin dashboard with auth state
+│   │   ├── login/
+│   │   │   └── page.tsx              # Google Workspace authentication
+│   │   └── layout.tsx                # Admin layout wrapper
 │   ├── components-test/              # Component showcase/testing page
 │   │   └── page.tsx
 │   ├── consult/                      # Consultation pages
+│   │   ├── book/
+│   │   │   └── page.tsx              # Cal.com booking integration
 │   │   └── page.tsx                  # Consultation form page
 │   ├── document-management-system-test/ # Document management testing page
 │   │   └── page.tsx
@@ -74,6 +83,7 @@ src/
 │   │   ├── base-template.tsx         # Base email template
 │   │   ├── consultation-confirmation.tsx # Consultation confirmation
 │   │   └── welcome.tsx               # Welcome email template
+│   ├── law-shop-logo.tsx             # Custom law firm logo component
 │   └── ui/                          # shadcn/ui component library
 │       ├── alert.tsx
 │       ├── badge.tsx
@@ -115,6 +125,8 @@ src/
 │   │   ├── firestore.ts           # CRUD operations
 │   │   ├── server-claims.ts       # Custom claims verification
 │   │   └── storage.ts             # Firebase storage operations
+│   ├── auth/                       # Authentication utilities
+│   │   └── verify-attorney.ts      # Server-side attorney verification
 │   ├── google/                     # Google services integration
 │   │   └── auth.ts                # Google service authentication
 │   ├── logging/                    # Error logging system
@@ -219,6 +231,14 @@ src/
 - **Data flow**: Client lookup → booking metadata update → case creation → client-case linking
 - **Error handling**: Clear messaging for missing clients and comprehensive logging
 
+**Admin Authentication System**: Complete implementation ✅ IMPLEMENTED
+- `src/app/admin/login/page.tsx` - Google Workspace authentication with domain restrictions
+- `src/app/admin/dashboard/page.tsx` - Attorney dashboard with auth state management
+- `src/lib/auth/verify-attorney.ts` - Server-side attorney verification for API routes
+- **Domain restriction**: Only `@thelawshop.com` Google Workspace accounts
+- **Role verification**: Custom claims with `role: 'attorney'` required
+- **Security**: Both client-side and server-side verification with proper error handling
+
 ## Future Implementation (Not Yet Built)
 
 ### Planned Structure Extensions
@@ -226,13 +246,13 @@ src/
 ```
 src/
 ├── app/
-│   ├── admin/             # Attorney admin interface  
-│   └── portal/[uuid]/     # Client-specific portals
+│   └── portal/[uuid]/     # Client-specific portals (not yet built)
 ```
 
 ### Planned Architectural Patterns
 
 **Authentication Duality**: Two completely separate auth systems
+- `/admin/*` → Attorney authentication with Google Workspace + custom claims ✅ IMPLEMENTED
 - `/portal/[uuid]` → Client-specific portal access (Firebase custom claims)
 
 **Firebase SDK Separation**: Strict server/client boundary enforcement ✅ IMPLEMENTED
@@ -261,11 +281,12 @@ src/
 ## Development Infrastructure
 
 ### Current Development Status
-- **Backend**: 90% complete - production-ready Firebase, Google APIs, email system, Cal.com webhook integration
-- **Frontend**: 15% complete - missing law firm homepage, admin dashboard, client portals
+- **Backend**: 95% complete - production-ready Firebase, Google APIs, email system, Cal.com webhook integration, admin authentication
+- **Frontend**: 35% complete - law firm homepage with custom branding, admin authentication system completed
 - **Priority 1**: ✅ COMPLETED - Cal.com webhook integration for M1 lead capture
-- **Priority 2**: Professional homepage with lead capture form (React Hook Form)
-- **Priority 3**: Admin dashboard for attorney client management
+- **Priority 2**: ✅ COMPLETED - Admin authentication system with Google Workspace integration
+- **Priority 3**: Client list management interface for admin dashboard
+- **Priority 4**: Client portal system for document management
 
 ### Import Path Aliases
 

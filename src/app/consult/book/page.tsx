@@ -16,19 +16,37 @@ export default function BookConsultationPage() {
     const bookingDataStr = sessionStorage.getItem('bookingData')
     const bookingData = bookingDataStr ? JSON.parse(bookingDataStr) : {}
     
-    // Clear booking data after reading
-    sessionStorage.removeItem('bookingData')
+    console.log('📋 SessionStorage data:', bookingData)
+    
+    // Don't clear booking data immediately - keep for debugging
+    // sessionStorage.removeItem('bookingData')
 
     // Initialize Cal.com embed with prefill
     const initializeCal = async () => {
       const cal = await getCalApi()
       
+      console.log('🎯 Initializing Cal.com with config:', {
+        layout: "month_view",
+        ...bookingData
+      })
+      
+      // Try a more explicit approach for prefill
+      const calConfig = {
+        layout: "month_view"
+      }
+      
+      // Add prefill data explicitly
+      if (bookingData.name) calConfig.name = bookingData.name
+      if (bookingData.email) calConfig.email = bookingData.email
+      if (bookingData.phone) calConfig.attendeePhoneNumber = bookingData.phone
+      if (bookingData['metadata[property]']) calConfig['metadata[property]'] = bookingData['metadata[property]']
+      if (bookingData['metadata[price]']) calConfig['metadata[price]'] = bookingData['metadata[price]']
+      
+      console.log('📝 Final Cal.com config:', calConfig)
+      
       cal("inline", {
         elementOrSelector: "#my-cal-inline-consult",
-        config: {
-          layout: "month_view",
-          ...bookingData // Spread prefill data
-        },
+        config: calConfig,
         calLink: "joseph-leon-w2irf8/consult"
       })
 
@@ -38,6 +56,7 @@ export default function BookConsultationPage() {
       })
 
       setIsCalLoaded(true)
+      console.log('✅ Cal.com initialized')
     }
 
     initializeCal()

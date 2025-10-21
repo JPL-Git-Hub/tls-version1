@@ -49,9 +49,14 @@ export default function ConsultationFormPage() {
       }
 
       // Success - store booking data and redirect to booking page
+      const formattedPhone = data.mobilePhone.startsWith('+') 
+        ? data.mobilePhone 
+        : `+1${data.mobilePhone.replace(/\D/g, '')}` // Add +1 for US numbers if not already prefixed
+      
       sessionStorage.setItem('bookingData', JSON.stringify({
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
+        phone: formattedPhone,
         ...(data.propertyAddress && { "metadata[property]": data.propertyAddress }),
         ...(data.purchasePrice && { "metadata[price]": `$${data.purchasePrice.toLocaleString()}` })
       }))
@@ -166,7 +171,7 @@ export default function ConsultationFormPage() {
                     type="tel"
                     {...register('mobilePhone')}
                     className={errors.mobilePhone ? 'border-red-500' : ''}
-                    placeholder="Enter your mobile phone number"
+                    placeholder="Enter your mobile phone number (e.g., +1234567890)"
                   />
                   {errors.mobilePhone && (
                     <p className="text-sm text-red-500">{errors.mobilePhone.message}</p>

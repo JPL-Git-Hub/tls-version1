@@ -8,6 +8,26 @@ Claude Code or CC should employ the following incremental Implementation Approac
 - **Follow established patterns** - Use existing codebase patterns and conventions
 - **Minimal scope changes** - Avoid expanding beyond the specific request
 
+## Cal.com Integration Patterns
+
+**Form-to-Booking Data Flow**: The consultation system uses sessionStorage to pass data seamlessly:
+1. **Consultation form** (`/consult`) collects client information and stores in sessionStorage
+2. **Booking page** (`/consult/book`) reads sessionStorage and prefills Cal.com embed
+3. **Cal.com webhook** receives booking and links to existing client record by email
+4. **Error prevention**: Webhook enforces form-first workflow (client must exist before booking)
+
+**SessionStorage Format**:
+```typescript
+{
+  name: "John Doe",
+  email: "john@example.com", 
+  "metadata[property]": "123 Main St",
+  "metadata[price]": "$500,000"
+}
+```
+
+**Critical**: Always use `@calcom/embed-react` for Cal.com integration, not `@calcom/atoms`
+
 ## Architecture Overview
 
 This is a **Next.js 15 App Router** application with **React Server Components** by default. The codebase maintains strict **Firebase SDK separation** between client and server contexts to prevent runtime conflicts. All components are server-side by default unless they require browser APIs or React hooks (marked with 'use client').
@@ -35,10 +55,11 @@ This is a **Next.js 15 App Router** application with **React Server Components**
 - `node scripts/analyze-imports.js` - Analyze import dependencies for Firebase SDK separation compliance
 
 ### Development Scripts
-- `./scripts/local-dev-emulator.sh` - Start development with Firebase emulators
+- `./scripts/local-dev-emulator.sh` - Start development with Firebase emulators (automatically sets attorney claims)
 - `./scripts/local-dev-real.sh` - Start development with production Firebase
 - `./scripts/clean-firestore.sh` - Clean Firestore data for testing
-- `node scripts/set-attorney-claims.js` - Set attorney custom claims for admin access
+- `USE_EMULATOR=true node scripts/set-attorney-claims.js` - Set attorney custom claims for admin access (emulator)
+- `node scripts/set-attorney-claims.js` - Set attorney custom claims for admin access (production)
 
 ## Current Implementation
 
@@ -173,6 +194,8 @@ src/
 - **Firebase**:
   - `firebase` - Client SDK v12
   - `firebase-admin` - Server SDK v13
+- **Cal.com Integration**:
+  - `@calcom/embed-react` - React embed component with prefill support
 
 ### Current Firebase Architecture
 
@@ -225,11 +248,14 @@ src/
 - `src/lib/logging/logger.client.ts` - Client-side logging
 - API endpoint for centralized error collection
 
-**Cal.com Webhook Integration**: Complete implementation ✅ IMPLEMENTED
+**Cal.com Integration**: Complete implementation ✅ IMPLEMENTED
 - `src/app/api/webhooks/calcom/route.ts` - Comprehensive booking flow handler
 - `src/types/external.ts` - Cal.com webhook types and payload structures
-- **Architecture**: Form-first workflow (client must exist before booking)
-- **Data flow**: Client lookup → booking metadata update → case creation → client-case linking
+- `src/app/consult/page.tsx` - Consultation form with sessionStorage integration
+- `src/app/consult/book/page.tsx` - Cal.com embed with prefill functionality
+- **Architecture**: Form-first workflow with seamless data transfer
+- **Data flow**: Consultation form → sessionStorage → Cal.com prefill → webhook → case creation
+- **Prefill system**: Uses `@calcom/embed-react` with sessionStorage to eliminate duplicate data entry
 - **Error handling**: Clear messaging for missing clients and comprehensive logging
 
 **Admin Authentication System**: Complete implementation ✅ IMPLEMENTED
@@ -282,17 +308,18 @@ src/
 ## Development Infrastructure
 
 ### Current Development Status
-- **Backend**: 95% complete - production-ready Firebase, Google APIs, email system, Cal.com webhook integration, admin authentication
-- **Frontend**: 50% complete - law firm homepage with custom branding, admin authentication system, client management interface completed
-- **Priority 1**: ✅ COMPLETED - Cal.com webhook integration for M1 lead capture
+- **Backend**: 98% complete - production-ready Firebase, Google APIs, email system, Cal.com integration with prefill, admin authentication
+- **Frontend**: 60% complete - law firm homepage with custom branding, admin authentication system, client management interface, seamless consultation booking flow
+- **Priority 1**: ✅ COMPLETED - Cal.com integration with prefill and webhook for M1 lead capture
 - **Priority 2**: ✅ COMPLETED - Admin authentication system with Google Workspace integration
 - **Priority 3**: ✅ COMPLETED - Client list management interface for admin dashboard
-- **Priority 4**: **NEXT MAJOR IMPLEMENTATION** - Stripe Payment Flow System
+- **Priority 4**: ✅ COMPLETED - Seamless consultation form to booking flow with prefill
+- **Priority 5**: **NEXT MAJOR IMPLEMENTATION** - Stripe Payment Flow System
   - Payment link generation API (`POST /api/payment-links/create`)
   - Stripe webhook handling for payment success
   - Client status updates (lead → paid)
   - Portal creation automation
-- **Priority 5**: Client portal system for document management (`/portal/[uuid]`)
+- **Priority 6**: Client portal system for document management (`/portal/[uuid]`)
 
 ### Import Path Aliases
 
@@ -318,6 +345,8 @@ src/
 - **Admin SDK**: Automatically detects emulator via environment variables (no `.settings()` calls needed)
 - **Credential isolation**: NO service account credentials in emulator mode (prevents authentication errors)
 - **Testing**: Use `./scripts/local-dev-emulator.sh` for full emulator development environment
+- **Attorney claims**: Custom claims automatically set during emulator startup for `josephleon@thelawshop.com`
+- **Claims persistence**: Custom claims persist in emulator data exports but require manual re-setting after fresh starts
 
 ## Critical Architecture Constraints
 

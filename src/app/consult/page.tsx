@@ -81,37 +81,25 @@ export default function ConsultationFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+    <div className="font-sans min-h-screen">
+      <main className="flex flex-col max-w-2xl mx-auto">
+        <div className="w-full flex justify-center">
+          <LawShopLogo
+            width={120}
+            height={120}
+          />
+        </div>
+        <div className="w-full flex justify-center">
           <Button 
             variant="ghost" 
             onClick={() => router.back()}
-            className="mb-4"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
           </Button>
-          
-          <div className="text-center mb-6">
-            <LawShopLogo width={80} height={80} className="mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Schedule Your Free Consultation
-            </h1>
-            <p className="text-lg text-gray-600 max-w-md mx-auto">
-              Tell us about your real estate transaction and we'll schedule a consultation to discuss how we can help.
-            </p>
-          </div>
         </div>
 
         {/* Form */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-xl">Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="max-w-md mx-auto space-y-6 md:space-y-8 w-full">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Error Alert */}
               {error && (
                 <Alert variant="destructive">
@@ -122,28 +110,28 @@ export default function ConsultationFormPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name *</Label>
+                  <Label htmlFor="firstName" className="text-sm font-medium leading-none">First *</Label>
                   <Input
                     id="firstName"
                     {...register('firstName')}
-                    className={errors.firstName ? 'border-red-500' : ''}
-                    placeholder="Enter your first name"
+                    className="h-10 w-full"
+                    placeholder="Name"
                   />
                   {errors.firstName && (
-                    <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                    <p className="text-sm text-destructive mt-1">{errors.firstName.message}</p>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Label htmlFor="lastName" className="text-sm font-medium leading-none">Last *</Label>
                   <Input
                     id="lastName"
                     {...register('lastName')}
-                    className={errors.lastName ? 'border-red-500' : ''}
-                    placeholder="Enter your last name"
+                    className="h-10 w-full"
+                    placeholder="Name"
                   />
                   {errors.lastName && (
-                    <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                    <p className="text-sm text-destructive mt-1">{errors.lastName.message}</p>
                   )}
                 </div>
               </div>
@@ -151,112 +139,54 @@ export default function ConsultationFormPage() {
               {/* Contact Fields */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm font-medium leading-none">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
                     {...register('email')}
-                    className={errors.email ? 'border-red-500' : ''}
+                    className="h-10 w-full"
                     placeholder="Enter your email address"
                   />
                   {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email.message}</p>
+                    <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
                   )}
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="cellPhone">Cell Phone *</Label>
+                  <Label htmlFor="cellPhone" className="text-sm font-medium leading-none">Cell Phone *</Label>
                   <Input
                     id="cellPhone"
                     type="tel"
                     {...register('cellPhone')}
-                    className={errors.cellPhone ? 'border-red-500' : ''}
+                    className="h-10 w-full"
                     placeholder="Enter your cell phone number (e.g., +1234567890)"
                   />
                   {errors.cellPhone && (
-                    <p className="text-sm text-red-500">{errors.cellPhone.message}</p>
+                    <p className="text-sm text-destructive mt-1">{errors.cellPhone.message}</p>
                   )}
                 </div>
               </div>
 
-              {/* Property Details Section */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Property Details (Optional)
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  If you have specific property information, please share it below. This helps us prepare for your consultation.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="propertyAddress">Property Address</Label>
-                    <Input
-                      id="propertyAddress"
-                      {...register('propertyAddress')}
-                      className={errors.propertyAddress ? 'border-red-500' : ''}
-                      placeholder="Enter the property address"
-                    />
-                    {errors.propertyAddress && (
-                      <p className="text-sm text-red-500">{errors.propertyAddress.message}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="purchasePrice">Purchase Price</Label>
-                    <Input
-                      id="purchasePrice"
-                      type="number"
-                      min="0"
-                      step="1000"
-                      onChange={handlePurchasePriceChange}
-                      className={errors.purchasePrice ? 'border-red-500' : ''}
-                      placeholder="Enter the purchase price"
-                    />
-                    {errors.purchasePrice && (
-                      <p className="text-sm text-red-500">{errors.purchasePrice.message}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
 
               {/* Submit Button */}
-              <div className="pt-4">
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-base"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    'Continue to Schedule Consultation'
-                  )}
-                </Button>
-              </div>
+              <button
+                type="submit"
+                className="w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 mt-6"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  'Continue to Schedule Consultation'
+                )}
+              </button>
 
-              {/* Help Text */}
-              <div className="text-center text-sm text-gray-600">
-                <p>
-                  After submitting this form, you'll be redirected to our calendar to choose your preferred consultation time.
-                </p>
-              </div>
             </form>
-          </CardContent>
-        </Card>
-
-        {/* Contact Info */}
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>
-            Questions about the process? Call us at{' '}
-            <span className="font-medium">(555) 123-LEGAL</span> or email{' '}
-            <span className="font-medium">josephleon@thelawshop.com</span>
-          </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

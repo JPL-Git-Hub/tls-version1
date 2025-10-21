@@ -23,7 +23,7 @@ export interface ClientData {
   firstName: string
   lastName: string
   email: string
-  mobilePhone: string
+  cellPhone: string
   propertyAddress?: string
   stripeCustomerId?: string
   status: 'lead' | 'paid' | 'active' | 'inactive'

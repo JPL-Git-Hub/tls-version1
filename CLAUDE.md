@@ -20,7 +20,8 @@ Claude Code or CC should employ the following incremental Implementation Approac
 ```typescript
 {
   name: "John Doe",
-  email: "john@example.com", 
+  email: "john@example.com",
+  phone: "+12345678901", 
   "metadata[property]": "123 Main St",
   "metadata[price]": "$500,000"
 }
@@ -176,7 +177,7 @@ src/
 - **Forms & Validation**:
   - `react-hook-form` - Form handling
   - `@hookform/resolvers` - Form validation resolvers
-  - `zod` - Schema validation
+  - `zod` - Schema validation with regex-based phone validation
 - **Email System**:
   - `@react-email/components` - React Email components
   - `@react-email/html` - HTML email utilities

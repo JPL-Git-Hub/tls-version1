@@ -6,8 +6,8 @@ export const ClientInputSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address'),
-  mobilePhone: z.string()
-    .min(1, 'Mobile phone is required')
+  cellPhone: z.string()
+    .min(1, 'Cell phone is required')
     .regex(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
   propertyAddress: z.string().optional(),
   purchasePrice: z.number().positive().optional(),

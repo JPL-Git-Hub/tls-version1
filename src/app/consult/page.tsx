@@ -49,9 +49,9 @@ export default function ConsultationFormPage() {
       }
 
       // Success - store booking data and redirect to booking page
-      const formattedPhone = data.mobilePhone.startsWith('+') 
-        ? data.mobilePhone 
-        : `+1${data.mobilePhone.replace(/\D/g, '')}` // Add +1 for US numbers if not already prefixed
+      const formattedPhone = data.cellPhone.startsWith('+') 
+        ? data.cellPhone 
+        : `+1${data.cellPhone.replace(/\D/g, '')}` // Add +1 for US numbers if not already prefixed
       
       sessionStorage.setItem('bookingData', JSON.stringify({
         name: `${data.firstName} ${data.lastName}`,
@@ -165,16 +165,16 @@ export default function ConsultationFormPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="mobilePhone">Mobile Phone *</Label>
+                  <Label htmlFor="cellPhone">Cell Phone *</Label>
                   <Input
-                    id="mobilePhone"
+                    id="cellPhone"
                     type="tel"
-                    {...register('mobilePhone')}
-                    className={errors.mobilePhone ? 'border-red-500' : ''}
-                    placeholder="Enter your mobile phone number (e.g., +1234567890)"
+                    {...register('cellPhone')}
+                    className={errors.cellPhone ? 'border-red-500' : ''}
+                    placeholder="Enter your cell phone number (e.g., +1234567890)"
                   />
-                  {errors.mobilePhone && (
-                    <p className="text-sm text-red-500">{errors.mobilePhone.message}</p>
+                  {errors.cellPhone && (
+                    <p className="text-sm text-red-500">{errors.cellPhone.message}</p>
                   )}
                 </div>
               </div>

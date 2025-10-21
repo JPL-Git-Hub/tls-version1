@@ -287,7 +287,7 @@ export default function AdminDashboardPage() {
                         </div>
                       </TableCell>
                       <TableCell>{client.email}</TableCell>
-                      <TableCell>{client.mobilePhone}</TableCell>
+                      <TableCell>{client.cellPhone}</TableCell>
                       <TableCell>
                         <Badge 
                           variant={

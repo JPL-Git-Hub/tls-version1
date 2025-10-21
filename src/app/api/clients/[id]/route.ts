@@ -113,10 +113,10 @@ export async function PUT(
 
     // Parse request body
     const body = await request.json()
-    const { email, firstName, lastName, mobilePhone, propertyAddress } = body
+    const { email, firstName, lastName, cellPhone, propertyAddress } = body
 
     // Validate at least one field is provided
-    if (!email && !firstName && !lastName && !mobilePhone && !propertyAddress) {
+    if (!email && !firstName && !lastName && !cellPhone && !propertyAddress) {
       return NextResponse.json(
         { error: 'VALIDATION_ERROR', message: 'At least one field must be provided for update' },
         { status: 400 }
@@ -128,7 +128,7 @@ export async function PUT(
     if (email !== undefined) updates.email = email
     if (firstName !== undefined) updates.firstName = firstName
     if (lastName !== undefined) updates.lastName = lastName
-    if (mobilePhone !== undefined) updates.mobilePhone = mobilePhone
+    if (cellPhone !== undefined) updates.cellPhone = cellPhone
     if (propertyAddress !== undefined) updates.propertyAddress = propertyAddress
 
     // Update client in Firestore (updateClient sets updatedAt automatically)

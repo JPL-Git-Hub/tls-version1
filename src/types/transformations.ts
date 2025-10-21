@@ -14,14 +14,14 @@ import type { StripeWebhookData } from './external'
  * Used by: /api/leads/submit
  */
 export const leadToClient = (
-  lead: { firstName: string; lastName: string; email: string; mobilePhone: string },
+  lead: { firstName: string; lastName: string; email: string; cellPhone: string },
   clientId: string
 ): ClientData => ({
   clientId,
   firstName: lead.firstName,
   lastName: lead.lastName,
   email: lead.email,
-  mobilePhone: lead.mobilePhone,
+  cellPhone: lead.cellPhone,
   status: 'lead', // Initial status for new leads
   createdAt: Timestamp.now(),
   updatedAt: Timestamp.now()
@@ -115,7 +115,7 @@ export const clientToApiResponse = (client: ClientData) => ({
   email: client.email,
   status: client.status,
   createdAt: client.createdAt.toDate().toISOString(),
-  // Note: mobilePhone and stripeCustomerId omitted for privacy
+  // Note: cellPhone and stripeCustomerId omitted for privacy
 })
 
 /**
@@ -139,13 +139,13 @@ export const validateLeadTransformation = (lead: {
   firstName: string
   lastName: string
   email: string
-  mobilePhone: string
+  cellPhone: string
 }): boolean => {
   return !!(
     lead.firstName?.trim() &&
     lead.lastName?.trim() &&
     lead.email?.trim() &&
-    lead.mobilePhone?.trim()
+    lead.cellPhone?.trim()
   )
 }
 

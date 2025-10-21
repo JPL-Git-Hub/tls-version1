@@ -31,7 +31,7 @@ export default function BookConsultationPage() {
       })
       
       // Try a more explicit approach for prefill
-      const calConfig = {
+      const calConfig: Record<string, any> = {
         layout: "month_view"
       }
       

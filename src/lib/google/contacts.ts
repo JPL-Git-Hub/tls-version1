@@ -22,7 +22,7 @@ export async function createContact(
           type: 'work'
         }],
         phoneNumbers: [{
-          value: clientData.mobilePhone,
+          value: clientData.cellPhone,
           type: 'mobile'
         }],
         addresses: clientData.propertyAddress ? [{

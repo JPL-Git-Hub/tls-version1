@@ -93,8 +93,8 @@ async function handleCompleteBookingFlow(webhookPayload: CalcomWebhookPayload): 
   const existingDoc = existingClientQuery.docs[0]
   const clientId = existingDoc.id
   
-  // Update existing client with booking metadata using utility function
-  const clientUpdates = {
+  // Update existing client with booking metadata using utility function  
+  const clientUpdates: Record<string, any> = {
     consultationBooked: true,
     consultationDate: Timestamp.fromDate(new Date(webhookPayload.payload.startTime)),
     bookingId: webhookPayload.payload.uid

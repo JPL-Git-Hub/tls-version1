@@ -4,31 +4,27 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { LawShopLogo } from '@/components/law-shop-logo'
+import { SplashScreen } from '@/components/splash-screen'
 import { ClientInputSchema, type ClientInput } from '@/types/inputs'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 export default function ConsultationFormPage() {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSplash, setShowSplash] = useState(true)
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
-    setValue,
-    watch
+    formState: { errors }
   } = useForm<ClientInput>({
     resolver: zodResolver(ClientInputSchema)
   })
-
-  const purchasePriceValue = watch('purchasePrice')
 
   const onSubmit = async (data: ClientInput) => {
     setIsSubmitting(true)
@@ -56,9 +52,7 @@ export default function ConsultationFormPage() {
       sessionStorage.setItem('bookingData', JSON.stringify({
         name: `${data.firstName} ${data.lastName}`,
         email: data.email,
-        phone: formattedPhone,
-        ...(data.propertyAddress && { "metadata[property]": data.propertyAddress }),
-        ...(data.purchasePrice && { "metadata[price]": `$${data.purchasePrice.toLocaleString()}` })
+        phone: formattedPhone
       }))
       router.push('/consult/book')
     } catch (err) {
@@ -68,37 +62,15 @@ export default function ConsultationFormPage() {
     }
   }
 
-  const handlePurchasePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    if (value === '') {
-      setValue('purchasePrice', undefined)
-    } else {
-      const numValue = parseFloat(value)
-      if (!isNaN(numValue) && numValue > 0) {
-        setValue('purchasePrice', numValue)
-      }
-    }
-  }
 
   return (
     <div className="font-sans min-h-screen">
       <main className="flex flex-col max-w-2xl mx-auto">
-        <div className="w-full flex justify-center">
-          <LawShopLogo
-            width={120}
-            height={120}
-          />
-        </div>
-        <div className="w-full flex justify-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => router.back()}
-          >
-          </Button>
-        </div>
-
+        <h1 className="text-2xl font-bold text-center mb-8">Book Free Consult</h1>
+        
         {/* Form */}
-        <div className="max-w-md mx-auto space-y-6 md:space-y-8 w-full">
+        <div className="max-w-md mx-auto space-y-6 md:space-y-8 w-full relative">
+          {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} duration={800} />}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Error Alert */}
               {error && (
@@ -110,12 +82,12 @@ export default function ConsultationFormPage() {
               {/* Name Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-sm font-medium leading-none">First *</Label>
+                  <Label htmlFor="firstName" className="text-sm font-medium leading-none">First Name *</Label>
                   <Input
                     id="firstName"
                     {...register('firstName')}
-                    className="h-10 w-full"
-                    placeholder="Name"
+                    className="h-10 w-full hover:border-gray-400 transition-colors"
+                    placeholder="First Name"
                   />
                   {errors.firstName && (
                     <p className="text-sm text-destructive mt-1">{errors.firstName.message}</p>
@@ -123,12 +95,12 @@ export default function ConsultationFormPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-sm font-medium leading-none">Last *</Label>
+                  <Label htmlFor="lastName" className="text-sm font-medium leading-none">Last Name *</Label>
                   <Input
                     id="lastName"
                     {...register('lastName')}
-                    className="h-10 w-full"
-                    placeholder="Name"
+                    className="h-10 w-full hover:border-gray-400 transition-colors"
+                    placeholder="Last Name"
                   />
                   {errors.lastName && (
                     <p className="text-sm text-destructive mt-1">{errors.lastName.message}</p>
@@ -139,13 +111,13 @@ export default function ConsultationFormPage() {
               {/* Contact Fields */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium leading-none">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm font-medium leading-none">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     {...register('email')}
-                    className="h-10 w-full"
-                    placeholder="Enter your email address"
+                    className="h-10 w-full hover:border-gray-400 transition-colors"
+                    placeholder="Email"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
@@ -158,8 +130,8 @@ export default function ConsultationFormPage() {
                     id="cellPhone"
                     type="tel"
                     {...register('cellPhone')}
-                    className="h-10 w-full"
-                    placeholder="Enter your cell phone number (e.g., +1234567890)"
+                    className="h-10 w-full hover:border-gray-400 transition-colors"
+                    placeholder="Cell Phone"
                   />
                   {errors.cellPhone && (
                     <p className="text-sm text-destructive mt-1">{errors.cellPhone.message}</p>
@@ -171,7 +143,7 @@ export default function ConsultationFormPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 mt-6"
+                className="w-full rounded-full border border-solid border-gray-300 transition-colors flex items-center justify-center bg-gray-100 text-black gap-2 hover:bg-gray-200 hover:border-gray-400 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 mt-6"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -180,7 +152,7 @@ export default function ConsultationFormPage() {
                     Submitting...
                   </>
                 ) : (
-                  'Continue to Schedule Consultation'
+                  'Book Free Consult'
                 )}
               </button>
 

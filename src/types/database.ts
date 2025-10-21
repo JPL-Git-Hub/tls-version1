@@ -26,7 +26,8 @@ export interface ClientData {
   cellPhone: string
   propertyAddress?: string
   stripeCustomerId?: string
-  status: 'lead' | 'paid' | 'active' | 'inactive'
+  googleContactResourceName?: string
+  status: 'lead' | 'retained' | 'closed'
   createdAt: TimestampType
   updatedAt: TimestampType
 }

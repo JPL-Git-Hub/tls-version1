@@ -15,7 +15,7 @@ const credentials = {
   universe_domain: 'googleapis.com'
 }
 
-// Create authenticated Google client
+// Create authenticated Google client with domain-wide delegation
 export const googleAuth = new google.auth.GoogleAuth({
   credentials,
   scopes: [
@@ -23,7 +23,8 @@ export const googleAuth = new google.auth.GoogleAuth({
     'https://www.googleapis.com/auth/drive',
     'https://www.googleapis.com/auth/gmail.send',
     'https://www.googleapis.com/auth/calendar'
-  ]
+  ],
+  subject: 'josephleon@thelawshop.com' // Impersonate attorney to access their contacts
 })
 
 // Initialize API clients

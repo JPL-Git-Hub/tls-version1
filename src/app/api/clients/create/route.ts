@@ -4,7 +4,6 @@ import { verifyAttorneyToken } from '@/lib/firebase/server-claims'
 import { createClient, countRecentClientsByEmail, createCase } from '@/lib/firebase/firestore'
 import { ClientData, CaseData } from '@/types/database'
 import { ClientInputSchema } from '@/types/inputs'
-import { createContact } from '@/lib/google/contacts'
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,14 +46,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create client data object
+    // Create client data object (without googleContactResourceName initially)
     const clientData: Omit<ClientData, 'clientId' | 'createdAt' | 'updatedAt'> = {
       email: clientInput.email,
       firstName: clientInput.firstName,
       lastName: clientInput.lastName,
       cellPhone: clientInput.cellPhone,
       ...(clientInput.propertyAddress && { propertyAddress: clientInput.propertyAddress }),
-      status: isAttorneyRequest ? 'active' : 'lead' // Attorneys create active clients, public creates leads
+      status: 'lead' // All new contacts start as leads, attorneys convert to retained after consultation
     }
 
     // Create client in Firestore
@@ -72,13 +71,6 @@ export async function POST(request: NextRequest) {
     // Create case and link to client
     const caseId = await createCase(caseData, [{ clientId, role: 'primary' }])
 
-    // Sync to Google Contacts (one-way)
-    try {
-      await createContact(clientInput, clientId)
-    } catch (contactError) {
-      // Log but don't fail the request if Google Contacts sync fails
-      console.error('Google Contacts sync failed:', contactError)
-    }
 
     return NextResponse.json(
       { 

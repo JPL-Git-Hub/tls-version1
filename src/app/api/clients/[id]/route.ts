@@ -113,10 +113,10 @@ export async function PUT(
 
     // Parse request body
     const body = await request.json()
-    const { email, firstName, lastName, cellPhone, propertyAddress } = body
+    const { email, firstName, lastName, cellPhone, propertyAddress, status } = body
 
     // Validate at least one field is provided
-    if (!email && !firstName && !lastName && !cellPhone && !propertyAddress) {
+    if (!email && !firstName && !lastName && !cellPhone && !propertyAddress && !status) {
       return NextResponse.json(
         { error: 'VALIDATION_ERROR', message: 'At least one field must be provided for update' },
         { status: 400 }
@@ -130,9 +130,22 @@ export async function PUT(
     if (lastName !== undefined) updates.lastName = lastName
     if (cellPhone !== undefined) updates.cellPhone = cellPhone
     if (propertyAddress !== undefined) updates.propertyAddress = propertyAddress
+    if (body.status !== undefined) updates.status = body.status
 
     // Update client in Firestore (updateClient sets updatedAt automatically)
     await updateClient(id, updates)
+
+    // Sync Google Contacts labels if status changed
+    if (body.status !== undefined && body.status !== existingClient.status) {
+      try {
+        const { syncContactLabels } = await import('@/lib/google/sync-contact-labels')
+        await syncContactLabels(id, body.status, existingClient.status)
+        console.log(`✅ Google Contacts label sync completed: ${existingClient.status} → ${body.status}`)
+      } catch (syncError) {
+        // Log but don't fail the request if Google sync fails
+        console.error('Google Contacts label sync failed:', syncError)
+      }
+    }
 
     return NextResponse.json(
       { 

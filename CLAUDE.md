@@ -21,9 +21,7 @@ Claude Code or CC should employ the following incremental Implementation Approac
 {
   name: "John Doe",
   email: "john@example.com",
-  phone: "+12345678901", 
-  "metadata[property]": "123 Main St",
-  "metadata[price]": "$500,000"
+  phone: "+12345678901"
 }
 ```
 
@@ -188,7 +186,7 @@ src/
 - **Utilities**:
   - `lucide-react` - Icon library
   - `date-fns` - Date manipulation
-  - `pdfjs-dist` - PDF handling capabilities
+  - `@react-pdf-viewer/core` & `@react-pdf-viewer/default-layout` - PDF viewing capabilities
   - `@tailwindcss/forms` - Enhanced form styling
   - `autoprefixer` - CSS vendor prefixing
   - `tailwindcss-animate` - Tailwind CSS animations
@@ -200,10 +198,11 @@ src/
 
 ### Current Firebase Architecture
 
-**Configuration Management**: Centralized external service validation
-- `src/lib/config/ext-env-var.ts` - Fail-fast validation for production credentials
-- `src/lib/config/firebase.server.ts` - Server-side config with emulator support  
+**Configuration Management**: Centralized service validation by category
+- `src/lib/config/ext-env-var.ts` - External service validation (Cal.com, Stripe) 
+- `src/lib/config/firebase.server.ts` - Google ecosystem credentials (Firebase, Workspace APIs)
 - `src/lib/config/firebase.client.ts` - Client-side config with emulator support
+- **Note**: `src/lib/google/auth.ts` uses Firebase credentials directly (same source, acceptable pattern)
 
 **Firebase Integration**: Production-ready 9-file structure with emulator support
 - `src/lib/firebase/admin.ts` - Admin SDK initialization with emulator configuration
@@ -318,9 +317,14 @@ src/
 - **Priority 5**: **NEXT MAJOR IMPLEMENTATION** - Stripe Payment Flow System
   - Payment link generation API (`POST /api/payment-links/create`)
   - Stripe webhook handling for payment success
-  - Client status updates (lead → paid)
+  - Client status updates (lead → retained)
   - Portal creation automation
-- **Priority 6**: Client portal system for document management (`/portal/[uuid]`)
+- **Priority 6**: Switch Cal.com prefill from sessionStorage to URL parameters
+  - Replace sessionStorage with URL query parameters for better multi-tab support
+  - Update `/consult/page.tsx` to redirect with URL params instead of sessionStorage
+  - Update `/consult/book/page.tsx` to read from URL params instead of sessionStorage
+  - Improves conversion rates and eliminates PII storage in browser
+- **Priority 7**: Client portal system for document management (`/portal/[uuid]`)
 
 ### Import Path Aliases
 

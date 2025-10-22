@@ -16,3 +16,20 @@ export const validateServiceConfig = <
 
   return config
 }
+
+// External service configuration
+const validateExternalConfig = () => {
+  const webhookSecret = process.env.CALCOM_WEBHOOK_SECRET
+  
+  if (!webhookSecret) {
+    throw new Error('Missing required environment variable: CALCOM_WEBHOOK_SECRET')
+  }
+  
+  return {
+    calcom: {
+      webhookSecret
+    }
+  }
+}
+
+export const externalConfig = validateExternalConfig()

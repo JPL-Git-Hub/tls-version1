@@ -6,6 +6,7 @@ import { adminDb } from '@/lib/firebase/admin'
 import { Timestamp } from 'firebase-admin/firestore'
 import { COLLECTIONS, type ClientData, type CaseData, type ClientCases } from '@/types/database'
 import { updateClient, updateCase, getClientCases } from '@/lib/firebase/firestore'
+import { externalConfig } from '@/lib/config/ext-env-var'
 
 /**
  * Cal.com Webhook Handler
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
     
     // Environment-aware signature verification
     const isDevelopment = process.env.NODE_ENV === 'development'
-    const webhookSecret = process.env.CALCOM_WEBHOOK_SECRET
+    const webhookSecret = externalConfig.calcom.webhookSecret
 
     if (!isDevelopment) {
       // Production: require webhook secret and signature verification

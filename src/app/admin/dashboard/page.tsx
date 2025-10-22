@@ -19,7 +19,7 @@ export default function AdminDashboardPage() {
   const [verifying, setVerifying] = useState(true)
   const [clients, setClients] = useState<ClientData[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState<'all' | 'lead' | 'active'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'lead' | 'retained'>('all')
   const router = useRouter()
 
   useEffect(() => {
@@ -97,13 +97,13 @@ export default function AdminDashboardPage() {
   const filteredClients = clients.filter(client => {
     if (statusFilter === 'all') return true
     if (statusFilter === 'lead') return client.status === 'lead'
-    if (statusFilter === 'active') return client.status === 'active' || client.status === 'paid'
+    if (statusFilter === 'retained') return client.status === 'retained'
     return true
   })
 
   // Calculate counts
   const leadCount = clients.filter(c => c.status === 'lead').length
-  const activeCount = clients.filter(c => c.status === 'active' || c.status === 'paid').length
+  const retainedCount = clients.filter(c => c.status === 'retained').length
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'N/A'
@@ -189,8 +189,8 @@ export default function AdminDashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Active Clients</p>
-                  <p className="text-2xl font-bold">{activeCount}</p>
+                  <p className="text-sm text-gray-600">Retained Clients</p>
+                  <p className="text-2xl font-bold">{retainedCount}</p>
                 </div>
               </div>
             </CardContent>
@@ -239,11 +239,11 @@ export default function AdminDashboardPage() {
                   Leads ({leadCount})
                 </Button>
                 <Button
-                  variant={statusFilter === 'active' ? 'default' : 'outline'}
+                  variant={statusFilter === 'retained' ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setStatusFilter('active')}
+                  onClick={() => setStatusFilter('retained')}
                 >
-                  Active ({activeCount})
+                  Retained ({retainedCount})
                 </Button>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function AdminDashboardPage() {
                         <Badge 
                           variant={
                             client.status === 'lead' ? 'secondary' :
-                            client.status === 'active' || client.status === 'paid' ? 'default' :
+                            client.status === 'retained' ? 'default' :
                             'outline'
                           }
                         >

@@ -66,7 +66,8 @@ async function setAttorneyClaims() {
     
     // Set custom claims
     await adminAuth.setCustomUserClaims(lawShopUser.uid, {
-      role: 'attorney'
+      role: 'attorney',
+      attorney: true
     })
     
     console.log('✅ Attorney claims set successfully!')

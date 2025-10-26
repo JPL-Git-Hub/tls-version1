@@ -9,8 +9,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { SplashScreen } from '@/components/splash-screen'
-import { ClientInputSchema, type ClientInput } from '@/types/inputs'
 import { Loader2 } from 'lucide-react'
+import { z } from 'zod'
+
+const consultationFormSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Invalid email address'),
+  cellPhone: z.string()
+    .min(1, 'Cell phone is required')
+    .regex(/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number'),
+  propertyAddress: z.string().optional(),
+})
+
+type ClientInput = z.infer<typeof consultationFormSchema>
 
 export default function ConsultationFormPage() {
   const router = useRouter()
@@ -23,7 +35,7 @@ export default function ConsultationFormPage() {
     handleSubmit,
     formState: { errors }
   } = useForm<ClientInput>({
-    resolver: zodResolver(ClientInputSchema)
+    resolver: zodResolver(consultationFormSchema)
   })
 
   const onSubmit = async (data: ClientInput) => {

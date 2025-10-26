@@ -25,7 +25,6 @@ export interface ClientData {
   email: string
   cellPhone: string
   propertyAddress?: string
-  stripeCustomerId?: string
   googleContactResourceName?: string
   status: 'lead' | 'retained' | 'closed'
   createdAt: TimestampType
@@ -36,7 +35,6 @@ export interface ClientData {
 export interface PortalData {
   portalUuid: string
   clientId: string
-  clientName: string
   portalStatus: PortalStatus
   registrationStatus: RegistrationStatus
   createdAt: TimestampType
@@ -82,43 +80,6 @@ export interface DocumentData {
   updatedAt: TimestampType
 }
 
-// Nylas Data Schemas (calendar and booking integration)
-export interface NylasGrant {
-  id: string               // grant_id from Nylas
-  userUid: string          // Firebase UID owner (attorney)
-  provider: 'google' | 'microsoft' | string
-  email: string
-  scope?: string
-  refreshToken?: string    // encrypted at rest if stored
-  createdAt: TimestampType
-  updatedAt: TimestampType
-}
-
-export interface NylasConfiguration {
-  id: string               // configuration_id from Nylas
-  ownerGrantId: string     // links to NylasGrant.id
-  name?: string
-  slug?: string            // human-readable slug for /schedule/:slug
-  visibility: 'public' | 'private'
-  settings?: unknown       // raw config JSON from Nylas
-  createdAt: TimestampType
-  updatedAt: TimestampType
-}
-
-export interface NylasBooking {
-  id: string               // booking.id from Nylas webhook
-  configurationId: string
-  organizerGrantId?: string
-  startTime: string        // ISO datetime
-  endTime: string          // ISO datetime
-  timezone: string
-  participant: { name?: string; email?: string }
-  status: 'created' | 'pending' | 'rescheduled' | 'cancelled'
-  nylasEventId?: string
-  raw?: unknown            // full webhook payload for audit
-  createdAt: TimestampType
-  updatedAt: TimestampType
-}
 
 // Collection Names Constants
 export const COLLECTIONS = {
@@ -129,10 +90,4 @@ export const COLLECTIONS = {
   CAL_BOOKINGS: 'cal_bookings',
   CAL_WEBHOOKS: 'cal_webhooks',
   CLIENT_CASES: 'client_cases',
-  STRIPE_WEBHOOKS: 'stripe_webhooks',
-  NYLAS_GRANTS: 'nylas_grants',
-  NYLAS_CONFIGURATIONS: 'nylas_configurations',
-  NYLAS_BOOKINGS: 'nylas_bookings',
-  NYLAS_WEBHOOKS: 'nylas_webhooks',
-  DOCUMENT_PROCESSING: 'document_processing',
 } as const

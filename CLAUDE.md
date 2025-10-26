@@ -226,7 +226,7 @@ src/
   - **M2 trigger**: Attorney manually converts lead to active client after consultation when client decides to hire
 - `GET /api/clients` - List all clients for authenticated attorney
 - `GET /api/clients/[id]` - Retrieve specific client by ID
-- `PUT /api/clients/[id]` - Update client fields (excludes attorneyId/createdAt, enables M1→M2 conversion)
+- `PUT /api/clients/[id]` - Update client fields (excludes createdAt, enables M1→M2 conversion)
 - `POST /api/logs/client-error` - Client-side error logging endpoint
 - `POST /api/webhooks/calcom` - **Cal.com Webhook Integration**: Links bookings to existing clients
   - **Enforces form-first workflow**: Throws error if client doesn't exist by email

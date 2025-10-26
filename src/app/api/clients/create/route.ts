@@ -3,7 +3,6 @@ import { verifyIdToken } from '@/lib/firebase/admin'
 import { verifyAttorneyToken } from '@/lib/firebase/server-claims'
 import { createClient, countRecentClientsByEmail, createCase } from '@/lib/firebase/firestore'
 import { ClientData, CaseData } from '@/types/database'
-import { ClientInputSchema } from '@/types/inputs'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,16 +23,34 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json()
-    const validation = ClientInputSchema.safeParse(body)
     
-    if (!validation.success) {
+    // Lightweight runtime validation
+    if (!body.firstName || !body.lastName || !body.email || !body.cellPhone) {
       return NextResponse.json(
-        { error: 'VALIDATION_ERROR', message: 'Invalid input data', details: validation.error.issues },
+        { error: 'VALIDATION_ERROR', message: 'Missing required fields: firstName, lastName, email, cellPhone' },
         { status: 400 }
       )
     }
 
-    const clientInput = validation.data
+    // Basic email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(body.email)) {
+      return NextResponse.json(
+        { error: 'VALIDATION_ERROR', message: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
+    // Basic phone format check
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
+    if (!phoneRegex.test(body.cellPhone)) {
+      return NextResponse.json(
+        { error: 'VALIDATION_ERROR', message: 'Invalid phone number format' },
+        { status: 400 }
+      )
+    }
+
+    const clientInput = body
 
     // Check for excessive submissions (same email > 3 in last 24 hours)
     if (!isAttorneyRequest) {

@@ -44,7 +44,6 @@ export interface PortalData {
 // Case Data Schema (legal matter tracking)
 export interface CaseData {
   caseId: string
-  clientNames: string
   caseType: CaseType
   status: CaseStatus
   propertyAddress?: string

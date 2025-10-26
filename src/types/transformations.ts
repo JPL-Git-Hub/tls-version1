@@ -26,16 +26,14 @@ export const leadToClient = (
 })
 
 /**
- * Creates initial case record from lead form data
- * Used by: /api/leads/submit
+ * Creates initial case record with default values
+ * Used by: /api/clients/create
  */
-export const leadToCase = (
-  lead: { firstName: string; lastName: string },
+export const createCaseData = (
   caseId: string,
   timestamp: TimestampType
 ): CaseData => ({
   caseId,
-  clientNames: `${lead.firstName} ${lead.lastName}`,
   caseType: 'Other', // Default until client specifies property type
   status: 'intake', // Initial status for new cases
   createdAt: timestamp,
@@ -86,6 +84,38 @@ export const uploadToDocument = (
 })
 
 // External API → Database Entity Transformations
+
+// Case Display Helpers
+
+/**
+ * Builds display name from ClientCases junction + ClientData
+ * Use this for listings, reports, UI display
+ * Returns format: "John Smith" or "John Smith & Jane Doe"
+ */
+export const getCaseDisplayName = async (
+  caseId: string,
+  adminDb: any // FirebaseFirestore.Firestore from admin SDK
+): Promise<string> => {
+  const relationshipsSnapshot = await adminDb
+    .collection('client_cases')
+    .where('caseId', '==', caseId)
+    .orderBy('createdAt', 'asc') // Primary client first
+    .get()
+  
+  if (relationshipsSnapshot.empty) return 'Unknown'
+  
+  const clientNames = await Promise.all(
+    relationshipsSnapshot.docs.map(async (doc: any) => {
+      const clientDoc = await adminDb.collection('clients').doc(doc.data().clientId).get()
+      if (!clientDoc.exists) return null
+      const client = clientDoc.data()
+      return `${client.firstName} ${client.lastName}`
+    })
+  )
+  
+  const validNames = clientNames.filter(Boolean)
+  return validNames.join(' & ')
+}
 
 // Database Entity → API Response Transformations
 

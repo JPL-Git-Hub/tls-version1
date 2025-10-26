@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
 
     // Create case data object
     const caseData: Omit<CaseData, 'caseId' | 'createdAt' | 'updatedAt'> = {
-      clientNames: `${clientInput.firstName} ${clientInput.lastName}`,
       caseType: 'Other',
       status: 'intake',
       ...(clientInput.propertyAddress && { propertyAddress: clientInput.propertyAddress }),
